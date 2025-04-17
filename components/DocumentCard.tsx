@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import React from 'react'
+import { TooltipWrapper } from "./wrappers/TooltipWrapper";
 
 const DocumentCard = () => {
     return (
@@ -30,9 +31,11 @@ const DocumentCard = () => {
                     </Avatar>
                     <span className="text-sm">Author Name</span>
                 </div>
-                <Button asChild size="sm">
-                    <Link href="#">View</Link>
-                </Button>
+                <TooltipWrapper content="View document details">
+                    <Button asChild size="sm">
+                        <Link href={`/documents`}>View</Link>
+                    </Button>
+                </TooltipWrapper>
             </CardFooter>
         </Card>
     )
