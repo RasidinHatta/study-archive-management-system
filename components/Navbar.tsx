@@ -19,7 +19,6 @@ import { auth } from '@/auth'
 
 const Navbar = async () => {
     const session = await auth()
-    console.log(session?.user?.image)
     return (
         <header className="border-b">
             <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
