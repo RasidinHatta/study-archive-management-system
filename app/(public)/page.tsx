@@ -29,7 +29,7 @@ export default function Home() {
         <div className="flex gap-4">
           {/* Get Started Button */}
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/register")}
             className="px-6 py-2 rounded-full font-semibold text-foreground bg-background border border-foreground hover:bg-accent-foreground hover:text-primary transition"
           >
             Get Started
