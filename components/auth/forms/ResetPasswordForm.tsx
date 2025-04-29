@@ -13,7 +13,7 @@ import { FormError } from "../FormError";
 import { FormSuccess } from "../FormSuccess";
 import CardWrapper from "../CardWrapper";
 import { NewPasswordSchema } from "@/lib/schemas";
-import { resetPassword } from "@/actions/reset-password";
+import { resetPassword } from "@/actions/password";
 
 const ResetPasswordForm = () => {
     const [loading, setLoading] = useState(false);

@@ -10,7 +10,7 @@ import { z } from "zod"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ResetPasswordSchema } from '@/lib/schemas'
 import { useState } from 'react'
-import { forgotPassword } from '@/actions/forgot-password'
+import { forgotPassword } from '@/actions/password'
 import CardWrapper from '../CardWrapper'
 
 const ForgotPasswordForm = () => {
