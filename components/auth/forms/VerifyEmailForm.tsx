@@ -3,9 +3,9 @@
 import { newVerification } from "@/actions/new-verification";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import CardWrapper from "./auth/CardWrapper";
-import { FormSuccess } from "./auth/FormSuccess";
-import { FormError } from "./auth/FormError";
+import CardWrapper from "../CardWrapper";
+import { FormSuccess } from "../FormSuccess";
+import { FormError } from "../FormError";
 
 const VerifyEmailForm = () => {
     const [error, setError] = useState<string | undefined>(undefined);

@@ -22,7 +22,6 @@ import CardWrapper from "../CardWrapper";
 import { FormSuccess } from "../FormSuccess";
 import { FormError } from "../FormError";
 import GoogleButton from "../GoogleButton";
-import { redirect } from "next/navigation";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);

@@ -15,6 +15,7 @@ import { LoginSchema } from '@/lib/schemas';
 import { login } from '@/actions/login';
 import CardWrapper from '../CardWrapper';
 import GoogleButton from '../GoogleButton';
+import Link from 'next/link';
 
 const LoginForm = () => {
     const [loading, setLoading] = useState(false);
@@ -92,6 +93,11 @@ const LoginForm = () => {
                     </Button>
                 </form>
             </Form>
+            <div className="mt-4 text-center">
+                <Link href="/forgot-password" className="hover:underline">
+                    Forgot Password?
+                </Link>
+            </div>
             <GoogleButton />
         </CardWrapper>
     );
