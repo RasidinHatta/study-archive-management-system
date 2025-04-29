@@ -44,3 +44,14 @@ export const login = async (data: z.infer<typeof LoginSchema>) => {
 
     return { success: "User logged in successfully!" }
 }
+
+export async function googleAuthenticate() {
+    try {
+        await signIn('google', {redirectTo: "/"})
+    } catch (error) {
+        if( error instanceof AuthError) {
+            return "google log in failed"
+        }
+        throw error
+    }
+}

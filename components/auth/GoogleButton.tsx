@@ -3,7 +3,7 @@
 import { useActionState } from "react"
 import { Button } from "../ui/button"
 import { BsGoogle } from "react-icons/bs"
-import { googleAuthenticate } from "@/actions/google-login"
+import { googleAuthenticate } from "@/actions/login"
 
 const GoogleButton = () => {
   const [ errorMsgGoogle, dispatchGoogle] = useActionState(googleAuthenticate, undefined)
