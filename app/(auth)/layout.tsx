@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const AuthLayout = ({
     children
@@ -12,7 +12,9 @@ const AuthLayout = ({
             </div>
             {/* Centered content */}
             <div className="h-screen flex items-center justify-center">
-                {children}
+                <Suspense fallback={<div>Loading...</div>}>
+                    {children}
+                </Suspense>
             </div>
         </section>
     )
