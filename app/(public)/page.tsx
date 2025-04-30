@@ -3,8 +3,7 @@
 import CommunityPage from "@/components/CommunityPage";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Separator } from "@/components/ui/separator"; // Import the Separator component
-import { SignOut } from "@/components/auth/SignOut";
+import { Separator } from "@/components/ui/separator";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 
 export default function Home() {
