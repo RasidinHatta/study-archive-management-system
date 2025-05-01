@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
+import { PrismaPlugin } from '@prisma/nextjs-monorepo-workaround-plugin'
 
 const nextConfig: NextConfig = {
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.plugins = [...config.plugins, PrismaPlugin()]
+    }
+    return config
+  },
   devIndicators: false,
   images: {
     remotePatterns: [
