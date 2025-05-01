@@ -10,6 +10,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(db),
     session: {
         strategy: 'jwt',
+        maxAge: 60,
+    },
+    jwt: {
+        maxAge: 60,
     },
     ...authConfig,
     callbacks: {
@@ -25,11 +29,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 return false
             }
 
-            if(existingUser.twoFactorEnabled) { 
+            if (existingUser.twoFactorEnabled) {
                 const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id)
 
                 console.log(twoFactorConfirmation)
-                if(!twoFactorConfirmation) return false
+                if (!twoFactorConfirmation) return false
 
                 //delete twoFactorConfirmation
                 await db.twoFactorConfirmation.delete({
@@ -53,6 +57,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.namee = existingUser.name
             token.email = existingUser.email
             token.image = existingUser.image
+            token.twoFactorEnabled = existingUser.twoFactorEnabled
+            token.emailVerified = existingUser.emailVerified
 
             return token
         },
@@ -61,10 +67,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 ...session,
                 user: {
                     ...session.user,
-                    id: token.sub,
-                    isOauth: token.isOauth,
+                    id: token.sub ?? "", // Ensure it's a string
+                    isOauth: token.isOauth as boolean,
+                    twoFactorEnabled: token.twoFactorEnabled as boolean,
+                    emailVerified: token.emailVerified as string | null
                 }
             }
-        },
+        }
     }
 })
