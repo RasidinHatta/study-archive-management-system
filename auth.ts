@@ -67,10 +67,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 ...session,
                 user: {
                     ...session.user,
-                    id: token.sub ?? "", // Ensure it's a string
-                    isOauth: token.isOauth as boolean,
-                    twoFactorEnabled: token.twoFactorEnabled as boolean,
-                    emailVerified: token.emailVerified as string | null
+                    id: token.sub,
+                    isOauth: token.isOauth,
+                    twoFactorEnabled: token.twoFactorEnabled,
+                    emailVerified: token.emailVerified
                 }
             }
         }
