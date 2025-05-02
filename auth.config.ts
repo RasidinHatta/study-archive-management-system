@@ -15,25 +15,36 @@ export default {
       },
       authorize: async (credentials) => {
         const validatedCredentials = LoginSchema.parse(credentials);
-
+      
         const user = await db.user.findFirst({
           where: {
             email: validatedCredentials.email,
           },
         });
-
+      
         if (!user || !user.password || !user.email) {
           return null;
         }
-
+      
         const passwordMatch = await bcrypt.compare(validatedCredentials.password, user.password);
         if (!passwordMatch) {
-          console.log("wrong password")
-          return null
+          console.log("wrong password");
+          return null;
+        }
+      
+        // Fix the type here:
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          password: user.password,
+          emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null, // <-- convert Date to string
+          image: user.image,
+          twoFactorEnabled: user.twoFactorEnabled,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
         };
-
-        return user;
-      },
+      },      
     })
   ],
   pages: {
