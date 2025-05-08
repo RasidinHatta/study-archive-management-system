@@ -7,14 +7,12 @@ import { AnimatedContainer } from '@/components/animations/AnimatedContainer'
 import { getDocumentById } from '@/actions/document'
 import DocumentNotFound from '@/components/not-found/DocumentNotFound'
 
-interface DocumentPageProps {
-    params: {
-        id: string
-    }
-}
+type DocumentPageProps = {
+    params: Promise<{ id: string }>;
+};
 
 const DocumentPage = async ({ params }: DocumentPageProps) => {
-    const { id } = params;
+    const { id } = await params;
     const document = await getDocumentById(id);
     const mockComments = Array(3).fill(0);
 
