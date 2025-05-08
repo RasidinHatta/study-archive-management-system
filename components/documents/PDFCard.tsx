@@ -3,26 +3,24 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipWrapper } from "../wrappers/TooltipWrapper";
-import { FileText } from "lucide-react"; // Using Lucide icon for PDF
+import { CldImage } from "next-cloudinary";
 
 interface PDFCardProps {
-  id: string; // Add document ID
+  id: string;
   title: string;
   description?: string | null;
+  publicId?: string;
   author: string;
   authorImage?: string | null;
-  pageCount?: number | null;
-  lastUpdated?: string | null;
 }
 
 const PDFCard = ({
   id,
   title,
   description,
+  publicId,
   author,
   authorImage,
-  pageCount,
-  lastUpdated,
 }: PDFCardProps) => {
   return (
     <Card className="hover:shadow-lg transition-shadow h-full flex flex-col">
@@ -33,17 +31,16 @@ const PDFCard = ({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-0 flex-1">
-        <div className="h-48 bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center gap-2">
-          <div className="text-center p-4">
-            <FileText className="w-12 h-12 mx-auto text-blue-600 dark:text-blue-400" />
-            <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {pageCount && `${pageCount} pages`}
-              {lastUpdated && ` • Updated ${new Date(lastUpdated).toLocaleDateString()}`}
-              {!lastUpdated && !pageCount && <span className="text-gray-400">No details available</span>}
-            </div>
-          </div>
-        </div>
+      <CardContent className="p-0 h-48 w-full relative overflow-hidden">
+        {publicId && (
+          <CldImage
+            fill
+            src={publicId}
+            sizes="100vw"
+            alt="Document preview"
+            className="object-cover object-top"
+          />
+        )}
       </CardContent>
 
       <CardFooter className="flex justify-between items-center pt-4">
@@ -59,7 +56,6 @@ const PDFCard = ({
 
         <TooltipWrapper content="View PDF document">
           <Button asChild size="sm" variant="outline">
-            {/* Link to the document's detail page */}
             <Link href={`/documents/${id}`}>
               View PDF
             </Link>

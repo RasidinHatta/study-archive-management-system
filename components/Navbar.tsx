@@ -65,7 +65,7 @@ const Navbar = async () => {
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                                        <UserAvatar/>
+                                                        <UserAvatar />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -75,7 +75,7 @@ const Navbar = async () => {
                                                     <DropdownMenuItem asChild>
                                                         <Link href="/admin">Admin</Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-500" asChild>
+                                                    <DropdownMenuItem asChild>
                                                         <SignOutButton />
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
@@ -130,7 +130,7 @@ const Navbar = async () => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                        <UserAvatar/>
+                                        <UserAvatar />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -140,7 +140,7 @@ const Navbar = async () => {
                                     <DropdownMenuItem asChild>
                                         <Link href="/admin">Admin</Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-red-500" asChild>
+                                    <DropdownMenuItem asChild>
                                         <SignOutButton />
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

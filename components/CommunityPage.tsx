@@ -10,6 +10,7 @@ interface Document {
   id: string;
   title: string;
   description: string | null;
+  publicId: string;
   user: {
     name: string | null; // Allow name to be string | null
     image: string | null;
@@ -44,6 +45,7 @@ const CommunityPage = ({ documents = [] }: CommunityPageProps) => {
               key={doc.id}
               title={doc.title}
               description={doc.description || "No description available"}
+              publicId={doc.publicId}
               author={doc.user.name || "Anonymous"}
               authorImage={doc.user.image}
             />
