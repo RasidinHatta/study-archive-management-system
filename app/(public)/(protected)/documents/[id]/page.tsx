@@ -14,7 +14,7 @@ interface DocumentPageProps {
 }
 
 const DocumentPage = async ({ params }: DocumentPageProps) => {
-    const { id } = await params;
+    const { id } = params;
     const document = await getDocumentById(id);
     const mockComments = Array(3).fill(0);
 
