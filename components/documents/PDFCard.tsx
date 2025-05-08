@@ -46,7 +46,7 @@ const PDFCard = ({
       <CardFooter className="flex justify-between items-center pt-4">
         <div className="flex items-center space-x-2">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={authorImage || "/default-avatar.png"} />
+            <AvatarImage src={authorImage || "https://github.com/shadcn.png"} />
             <AvatarFallback>
               {author.charAt(0).toUpperCase()}
             </AvatarFallback>
