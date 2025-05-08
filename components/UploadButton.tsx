@@ -1,3 +1,4 @@
+// UploadButton.tsx
 "use client"
 
 import React from 'react'
@@ -6,15 +7,15 @@ import { FiUpload } from 'react-icons/fi'
 import { CldUploadButton } from 'next-cloudinary'
 import { useRouter } from 'next/navigation'
 
-const UploadButton = () => {
+const UploadButton = ({ onUpload }: { onUpload: (info: any) => void }) => {
     const router = useRouter()
+
     return (
         <Button asChild>
             <CldUploadButton
-                onSuccess={() => {
-                    setTimeout(() => {
-                        router.refresh()
-                    }, 1000)
+                onSuccess={(result: any) => {
+                    onUpload(result.info) // Pass Cloudinary info to parent
+                    setTimeout(() => router.refresh(), 1000)
                 }}
                 options={{
                     sources: ['local', 'google_drive'],
@@ -23,7 +24,6 @@ const UploadButton = () => {
                 }}
                 uploadPreset="biomed"
             >
-
                 <div className="flex gap-2">
                     <FiUpload className="w-5 h-5" />
                     Upload

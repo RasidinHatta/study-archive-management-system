@@ -49,9 +49,6 @@ export const DocumentSchema = z.object({
         message: "Title is required",
     }),
     description: z.string().optional(),
-    url: z.string().url({
-        message: "Invalid Cloudinary URL",
-    }),
     publicId: z.string().min(1, {
         message: "Public ID is required",
     }),

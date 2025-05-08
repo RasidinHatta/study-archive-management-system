@@ -5,6 +5,8 @@ import { DocumentSchema } from "@/lib/schemas";
 import db from "@/prisma/prisma";
 import * as z from "zod";
 
+const cloudinaryAppName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+
 export const documentUpload = async (data: z.infer<typeof DocumentSchema>) => {
     const session = await auth()
     if (!session?.user?.id) {
@@ -13,7 +15,8 @@ export const documentUpload = async (data: z.infer<typeof DocumentSchema>) => {
     const userId = session.user.id;
     try {
         const validatedData = DocumentSchema.parse(data);
-        const { title, description, url, publicId, format, resourceType } = validatedData;
+        const { title, description, publicId, format, resourceType } = validatedData;
+        const url = `https://res.cloudinary.com/${cloudinaryAppName}/image/upload/${publicId}.pdf`
 
         await db.document.create({
             data: {

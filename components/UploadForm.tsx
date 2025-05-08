@@ -13,17 +13,18 @@ import { Textarea } from './ui/textarea'
 import { FormSuccess } from './auth/FormSuccess'
 import { FormError } from './auth/FormError'
 import { documentUpload } from '@/actions/document'
+import UploadButton from './UploadButton'
 
 const UploadForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
     const form = useForm<z.infer<typeof DocumentSchema>>({
         resolver: zodResolver(DocumentSchema),
         defaultValues: {
             title: "",
             description: "",
-            url: "",
             publicId: "",
             format: "",
             resourceType: ""
@@ -44,17 +45,25 @@ const UploadForm = () => {
             }
         });
     };
+
     return (
         <CardWrapper
             headerLabel="Document Uploader"
             title="Upload Document"
             backButtonHref="/home"
-            backButtonLabel="Back to Home Page "
+            backButtonLabel="Back to Home Page"
             showSocial={false}
             className="w-full"
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <UploadButton
+                        onUpload={(info) => {
+                            form.setValue("publicId", info.public_id || "");
+                            form.setValue("format", info.format || "");
+                            form.setValue("resourceType", info.resource_type || "");
+                        }}
+                    />
                     <div className="space-y-4">
                         <FormField
                             control={form.control}
@@ -82,58 +91,6 @@ const UploadForm = () => {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="url"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Document URL</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} placeholder="Cloudinary URL" type="text" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="publicId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Public ID</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} placeholder="Cloudinary public ID" type="text" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="format"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Format</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} placeholder="pdf, jpg, etc." type="text" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="resourceType"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Resource Type</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} placeholder="image, raw, etc." type="text" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
                     </div>
                     <FormSuccess message={success} />
                     <FormError message={error} />
@@ -143,7 +100,7 @@ const UploadForm = () => {
                 </form>
             </Form>
         </CardWrapper>
-    )
+    );
 }
 
-export default UploadForm
+export default UploadForm;
