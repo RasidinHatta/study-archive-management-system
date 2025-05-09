@@ -29,7 +29,7 @@ const LoginForm = () => {
             email: "",
             password: "",
             code: "",
-        },        
+        },
     });
 
     const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
@@ -39,18 +39,17 @@ const LoginForm = () => {
         startTransition(() => {
             login(data).then((res) => {
                 if (res.error) {
-                    form.reset()
-                    setError(res.error)
+                    setError(res.error);
                 }
                 if (res.success) {
-                    form.reset()
-                    setSuccess(res.success)
+                    form.reset(); // Only reset on full success
+                    setSuccess(res.success);
                 }
                 if (res.twoFactor) {
-                    setShowTwoFactor(true)
+                    setShowTwoFactor(true);
                 }
-            }).catch(() => setError("Something went wrong"));
-        })
+            });
+        });
     };
     return (
         <CardWrapper
