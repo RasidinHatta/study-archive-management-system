@@ -27,7 +27,7 @@ export default function Home() {
           {/* Get Started Button */}
           <button
             onClick={() => router.push("/register")}
-            className="px-6 py-2 rounded-full font-semibold text-foreground bg-background border border-foreground hover:bg-accent-foreground hover:text-primary transition"
+            className="px-6 py-2 rounded-full font-semibold hover:text-foreground hover:bg-background border border-foreground bg-accent-foreground text-primary transition"
           >
             Get Started
           </button>
@@ -35,7 +35,7 @@ export default function Home() {
           {/* Browse Documents Button */}
           <button
             onClick={scrollToCommunity}
-            className="bg-transparent border border-foreground px-6 py-2 rounded-full font-semibold text-foreground hover:bg-accent-foreground hover:text-primary transition"
+            className="hover:bg-background border border-foreground px-6 py-2 rounded-full font-semibold hover:text-foreground bg-accent-foreground text-primary transition"
           >
             Browse Documents
           </button>

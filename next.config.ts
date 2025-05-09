@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com", // Google's image domain for profile pics
       },
+      {
+        protocol: "https",
+        hostname: "github.com", // GitHub image domain
+        pathname: "/shadcn.png", // Optional: specific image path pattern if needed
+      },
     ],
   },
 };
