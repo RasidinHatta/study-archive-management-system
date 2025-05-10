@@ -1,26 +1,28 @@
 import React from 'react'
-import { Avatar, AvatarImage } from './ui/avatar'
-import { AvatarFallback } from '@radix-ui/react-avatar'
-import { Textarea } from './ui/textarea'
-import { Button } from './ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 
-const Comment = () => {
+interface CommentProps {
+  username?: string
+  avatarUrl?: string
+  commentText: string
+}
+
+const Comment: React.FC<CommentProps> = ({
+  username = "You",
+  avatarUrl = "https://github.com/shadcn.png",
+  commentText,
+}) => {
   return (
-    <div className="space-y-4">
-      <div className="flex space-x-3">
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>You</AvatarFallback>
-        </Avatar>
-        <div className="flex-1 space-y-2">
-          <Textarea
-            placeholder="Add to the discussion..."
-            className="min-h-[100px]"
-          />
-          <div className="flex justify-end">
-            <Button>Post Comment</Button>
-          </div>
-        </div>
+    <div className="flex space-x-3 p-4 border rounded-md">
+      <Avatar>
+        <AvatarImage src={avatarUrl} />
+        <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <p className="font-semibold">{username}</p>
+        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+          {commentText}
+        </p>
       </div>
     </div>
   )

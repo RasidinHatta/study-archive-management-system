@@ -12,7 +12,7 @@ const ProtectedLayout = async ({
     if (!session) return redirect("/login")
     return (
         <main>
-            <AutoLogout timeout={20 * 1000} />
+            {/* <AutoLogout timeout={20 * 1000} /> */}
             {children}
         </main>
     );

@@ -11,11 +11,14 @@ import { FormSuccess } from '../auth/FormSuccess';
 import { Button } from '../ui/button';
 import { userImageUpload } from '@/actions/image';
 import ChangeUserImage from './ChangeUserImage';
+import { useRouter } from 'next/navigation';
 
 const ChangeImageForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const router = useRouter();
+
 
     const form = useForm<z.infer<typeof UserImageSchema>>({
         resolver: zodResolver(UserImageSchema),
@@ -36,6 +39,7 @@ const ChangeImageForm = () => {
                 setError("");
                 setSuccess(res.success);
                 setLoading(false);
+                router.refresh(); // ✅ Refresh the page
             }
         });
     };

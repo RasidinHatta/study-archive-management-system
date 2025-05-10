@@ -22,7 +22,7 @@ const UploadButton = ({ onUpload }: { onUpload: (info: any) => void }) => {
                     clientAllowedFormats: ['pdf'],
                     maxFileSize: 10485760
                 }}
-                uploadPreset="biomed"
+                uploadPreset="sams-doc"
             >
                 <div className="flex gap-2">
                     <FiUpload className="w-5 h-5" />

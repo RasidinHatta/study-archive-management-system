@@ -24,7 +24,7 @@ const ProfilePage = async () => {
               alt="Profile Picture"
               width={150}
               height={150}
-              className="rounded-full border-2 border-border"
+              className="rounded-full object-cover w-[150px] h-[150px] border"
             />
           ) : (
             <div className="w-[150px] h-[150px] rounded-full bg-muted-foreground flex items-center justify-center text-foreground">
@@ -34,7 +34,7 @@ const ProfilePage = async () => {
         </CardContent>
         {/* Button to change the image */}
         <CardContent className="flex justify-center">
-          <ChangeImageForm/>
+          <ChangeImageForm />
         </CardContent>
       </Card>
 

@@ -38,7 +38,12 @@ const DocumentPage = async ({ params }: DocumentPageProps) => {
                         ) : (
                             <div className="space-y-6">
                                 {mockComments.map((_, index) => (
-                                    <Comment key={index} />
+                                    <Comment
+                                        key={index}
+                                        username={`User ${index + 1}`}
+                                        avatarUrl={`https://avatars.githubusercontent.com/u/12459${index + 1}`}
+                                        commentText={`This is a mock comment number ${index + 1}.`}
+                                    />
                                 ))}
                             </div>
                         )}
