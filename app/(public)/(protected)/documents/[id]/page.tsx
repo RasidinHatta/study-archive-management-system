@@ -4,7 +4,7 @@ import React from 'react'
 import CommentForm from '@/components/CommentForm'
 import CommentsEmpty from '@/components/empty-states/CommentsEmpty'
 import { AnimatedContainer } from '@/components/animations/AnimatedContainer'
-import { getDocumentById } from '@/actions/document'
+import { getDocumentById } from '@/data/document'
 import DocumentNotFound from '@/components/not-found/DocumentNotFound'
 
 type DocumentPageProps = {

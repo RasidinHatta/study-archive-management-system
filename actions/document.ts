@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { DocumentSchema } from "@/lib/schemas";
 import db from "@/prisma/prisma";
 import * as z from "zod";
+import cloudinary from 'cloudinary'
 
 const cloudinaryAppName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 
@@ -50,24 +51,12 @@ export const documentUpload = async (data: z.infer<typeof DocumentSchema>) => {
     }
 }
 
-export const getCommunityDocuments = async () => {
-    const documents = await db.document.findMany({
-        include: { user: true }, // Fetch author details
-        orderBy: { createdAt: "desc" }, // Newest first
-    });
-    return documents;
-};
-
-
-export const getDocumentById = async (id: string) => {
+export const deleteDocumentFromCloudinary = async (publicId: string) => {
     try {
-        const document = await db.document.findUnique({
-            where: { id },
-            include: { user: true }
-        })
-        return document
+        const result = await cloudinary.v2.uploader.destroy(publicId)
+        return result
     } catch (error) {
-        console.error("Error fetching document:", error)
-        return null
+        console.error("Failed to delete Document:", error)
+        throw new Error("Document deletion failed.")
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import CommunityPage from '@/components/CommunityPage';
-import { getCommunityDocuments } from '@/actions/document';
+import { getCommunityDocuments } from '@/data/document';
 
 const Page = async () => {
   // Fetch documents from the server

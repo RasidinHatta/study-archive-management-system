@@ -117,7 +117,7 @@ const UploadForm = () => {
           <FormError message={error} />
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Uploading..." : "Upload"}
+            {loading ? "Uploading..." : "Upload Document"}
           </Button>
         </form>
       </Form>
