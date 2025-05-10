@@ -53,16 +53,15 @@ export const NewPasswordSchema = z.object({
 });
 
 export const DocumentSchema = z.object({
-    title: z.string().min(1, {
-        message: "Title is required",
-    }),
-    description: z.string().optional(),
-    publicId: z.string().min(1, {
-        message: "Public ID is required",
-    }),
-    format: z.string().optional(),
-    resourceType: z.string().optional(),
-})
+  title: z.string().min(1, {
+    message: "Title is required",
+  }),
+  description: z.string().optional(),
+  publicId: z.string().optional(),
+  format: z.string().optional(),
+  resourceType: z.string().optional(),
+});
+
 
 export const UserImageSchema = z.object({
     publicId: z.string().min(1, {

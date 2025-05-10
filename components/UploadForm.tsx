@@ -1,32 +1,31 @@
-"use client"
+"use client";
 
-import { useForm } from 'react-hook-form'
-import CardWrapper from './auth/CardWrapper'
-import { Button } from './ui/button'
+import { useForm } from "react-hook-form";
+import CardWrapper from "./auth/CardWrapper";
+import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from './ui/form'
-import { z } from "zod"
-import { zodResolver } from '@hookform/resolvers/zod'
-import { DocumentSchema } from '@/lib/schemas'
-import { useState } from 'react'
-import { Input } from './ui/input'
-import { Textarea } from './ui/textarea'
-import { FormSuccess } from './auth/FormSuccess'
-import { FormError } from './auth/FormError'
-import { documentUpload } from '@/actions/document'
-import UploadButton from './UploadButton'
-import { CldImage } from 'next-cloudinary'
+  FormMessage,
+} from "./ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DocumentSchema } from "@/lib/schemas";
+import { useState } from "react";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { FormSuccess } from "./auth/FormSuccess";
+import { FormError } from "./auth/FormError";
+import { uploadDocCloudinary } from "@/actions/document"; // Make sure this is the right path
 
 const UploadForm = () => {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof DocumentSchema>>({
     resolver: zodResolver(DocumentSchema),
@@ -35,55 +34,43 @@ const UploadForm = () => {
       description: "",
       publicId: "",
       format: "",
-      resourceType: ""
+      resourceType: "",
     },
-  })
-
-  const publicId = form.watch("publicId") // 👈 this is the key to previewing the image
+  });
 
   const onSubmit = async (data: z.infer<typeof DocumentSchema>) => {
-    setLoading(true)
-    setError("")
-    setSuccess("")
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
-    const res = await documentUpload(data)
-    if (res.error) {
-      setError(res.error)
-    } else if (res.success) {
-      setSuccess(res.success)
+    if (!file) {
+      setError("Please select a file.");
+      setLoading(false);
+      return;
     }
-    setLoading(false)
-  }
+
+    const res = await uploadDocCloudinary(file, data);
+    if (res.error) {
+      setError(res.error);
+    } else if (res.success) {
+      setSuccess(res.success);
+      form.reset();
+      setFile(null);
+    }
+    setLoading(false);
+  };
 
   return (
     <CardWrapper
       headerLabel="Document Uploader"
       title="Upload Document"
-      backButtonHref="/home"
+      backButtonHref="/"
       backButtonLabel="Back to Home Page"
       showSocial={false}
       className="w-full"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <UploadButton
-            onUpload={(info) => {
-              form.setValue("publicId", info.public_id || "")
-              form.setValue("format", info.format || "")
-              form.setValue("resourceType", info.resource_type || "")
-            }}
-          />
-
-          {publicId && (
-            <CldImage
-              width="400"
-              height="300"
-              src={publicId}
-              sizes="100vw"
-              alt="Uploaded preview"
-            />
-          )}
-
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -111,6 +98,22 @@ const UploadForm = () => {
                 </FormItem>
               )}
             />
+
+            <FormItem>
+              <FormLabel>Upload File</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setFile(e.target.files[0]);
+                    }
+                  }}
+                />
+              </FormControl>
+              {!file && <FormMessage>Please select a file</FormMessage>}
+            </FormItem>
           </div>
 
           <FormSuccess message={success} />
@@ -122,7 +125,7 @@ const UploadForm = () => {
         </form>
       </Form>
     </CardWrapper>
-  )
-}
+  );
+};
 
-export default UploadForm
+export default UploadForm;
