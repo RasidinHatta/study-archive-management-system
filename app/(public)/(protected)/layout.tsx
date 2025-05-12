@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
-import AutoLogout from '@/components/auth/AutoLogout';
+import { SessionWatcher } from '@/components/auth/SessionWatcher';
+import { SessionProvider } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import React from 'react';
 
@@ -11,10 +12,10 @@ const ProtectedLayout = async ({
     const session = await auth()
     if (!session) return redirect("/login")
     return (
-        <main>
-            {/* <AutoLogout timeout={20 * 1000} /> */}
+        <SessionProvider>
+            <SessionWatcher />
             {children}
-        </main>
+        </SessionProvider>
     );
 };
 
