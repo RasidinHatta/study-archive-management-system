@@ -27,7 +27,7 @@ const SideMenu = async () => {
                             variant="ghost"
                             className="w-full justify-start flex gap-2"
                         >
-                            <Link href="/documents">
+                            <Link href="/admin/documents">
                                 Documents
                             </Link>
                         </Button>
@@ -36,7 +36,7 @@ const SideMenu = async () => {
                             variant="ghost"
                             className="w-full justify-start flex gap-2"
                         >
-                            <Link href="/users">
+                            <Link href="/admin/users">
                                 Users
                             </Link>
                         </Button>
@@ -45,7 +45,7 @@ const SideMenu = async () => {
                             variant="ghost"
                             className="w-full justify-start flex gap-2"
                         >
-                            <Link href="/setting">
+                            <Link href="/admin/setting">
                                 Setting
                             </Link>
                         </Button>
