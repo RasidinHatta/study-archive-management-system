@@ -5,6 +5,7 @@ import db from "./prisma/prisma"
 import { getUserById } from "./data/user"
 import { getAccountByUserId } from "./data/account"
 import { getTwoFactorConfirmationByUserId } from "./data/verification-token"
+import { Role } from "./lib/generated/prisma"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(db),
@@ -61,6 +62,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.image = existingUser.image
             token.twoFactorEnabled = existingUser.twoFactorEnabled
             token.emailVerified = existingUser.emailVerified
+            token.role= existingUser.role
 
             return token
         },
@@ -74,6 +76,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     twoFactorEnabled: token.twoFactorEnabled,
                     emailVerified: token.emailVerified,
                     image: token.image as string,
+                    role: token.role as Role
                 }
             }
         }

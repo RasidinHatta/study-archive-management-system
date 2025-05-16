@@ -15,6 +15,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  USER
+  PUBLICUSER
+}
+
 model User {
   id                    String                 @id @default(cuid())
   name                  String?
@@ -28,8 +34,10 @@ model User {
   twoFactorConfirmation TwoFactorConfirmation?
   documents             Document[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role                  Role                   @default(PUBLICUSER)
+
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
 model Account {

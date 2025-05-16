@@ -84,34 +84,74 @@ export const login = async (data: z.infer<typeof LoginSchema>) => {
   return { success: "User logged in successfully!" };
 };
 
+export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
+  const validatedData = LoginSchema.safeParse(data);
+
+  if (!validatedData.success) {
+    return { error: "Invalid input data" };
+  }
+
+  const { email, password } = validatedData.data;
+  const user = await getUserByEmail(email);
+
+  if (!user || !user.password || !user.email) {
+    return { error: "User not found" };
+  }
+
+  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  if (!isPasswordCorrect) {
+    return { error: "Wrong Password" };
+  }
+
+  try {
+    await signIn("credentials", {
+      email: user.email,
+      password,
+      redirectTo: "/admin",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.name) {
+        case "CredentialsSignin":
+          return { error: "Invalid credentials" };
+        default:
+          return { error: "Please confirm your email address" };
+      }
+    }
+    throw error;
+  }
+
+  return { success: "User logged in successfully!" };
+}
+
 
 export async function googleAuthenticate() {
-    try {
-        await signIn('google', { redirectTo: "/" })
-    } catch (error) {
-        if (error instanceof AuthError) {
-            return "google log in failed"
-        }
-        throw error
+  try {
+    await signIn('google', { redirectTo: "/" })
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return "google log in failed"
     }
+    throw error
+  }
 }
 
 export const twoFactorOption = async (enable: boolean) => {
-    try {
-        const session = await auth();
+  try {
+    const session = await auth();
 
-        if (!session?.user?.id) {
-            return { error: "Unauthorized" };
-        }
-
-        await db.user.update({
-            where: { id: session.user.id },
-            data: { twoFactorEnabled: enable },
-        });
-
-        return { success: `Two-Factor Authentication ${enable ? "enabled" : "disabled"}` };
-    } catch (error) {
-        console.error("2FA toggle error:", error);
-        return { error: "Something went wrong while updating 2FA preference" };
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
     }
+
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { twoFactorEnabled: enable },
+    });
+
+    return { success: `Two-Factor Authentication ${enable ? "enabled" : "disabled"}` };
+  } catch (error) {
+    console.error("2FA toggle error:", error);
+    return { error: "Something went wrong while updating 2FA preference" };
+  }
 };

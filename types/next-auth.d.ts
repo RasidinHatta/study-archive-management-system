@@ -1,4 +1,5 @@
 // types/next-auth.d.ts
+import { Role } from "@/lib/generated/prisma"
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth"
 import { JWT } from "next-auth/jwt"
 
@@ -9,6 +10,7 @@ declare module "next-auth" {
       isOauth?: boolean
       twoFactorEnabled?: boolean
       emailVerified?: string | Date | null
+      role: Role
     } & DefaultSession["user"]
   }
 
@@ -16,6 +18,7 @@ declare module "next-auth" {
     twoFactorEnabled?: boolean
     emailVerified?: string | Date | null
     isOauth?: boolean
+    role: Role
   }
 }
 
@@ -25,5 +28,6 @@ declare module "next-auth/jwt" {
     isOauth?: boolean
     twoFactorEnabled?: boolean
     emailVerified?: string | Date | null
+    role: Role
   }
 }

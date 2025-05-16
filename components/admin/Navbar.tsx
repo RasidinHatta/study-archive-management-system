@@ -1,20 +1,13 @@
+import { auth } from '@/auth'
 import Link from 'next/link'
 import React from 'react'
-import { Button } from './ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { ModeToggle } from './theme/ModeToggle'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet'
 import { Menu } from 'lucide-react'
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
-} from './ui/sheet'
-import SearchBar from './SearchBar'
-import { SignOutButton } from './auth/SignOutButton'
-import { auth } from '@/auth'
-import UserAvatar from './user/UserAvatar'
+import { SignOutButton } from '../auth/SignOutButton'
+import { ModeToggle } from '../theme/ModeToggle'
+import { Button } from '../ui/button'
+import UserAvatar from '../user/UserAvatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
 
 const Navbar = async () => {
     const session = await auth()
@@ -36,28 +29,13 @@ const Navbar = async () => {
 
                         <SheetContent side="left" className="w-64 p-4 flex flex-col">
                             <SheetHeader>
-                                <Link
-                                    href="/"
-                                    className="font-bold text-lg transition-transform transform hover:scale-105 hover:text-primary"
-                                >
-                                    <SheetTitle>SAMS</SheetTitle>
-                                </Link>
-                                <Link
-                                    href="/community"
-                                    className="text-lg transition-transform transform hover:scale-105 hover:text-primary"
-                                >
-                                    Community
-                                </Link>
+                                <SheetTitle>SAMS</SheetTitle>
                             </SheetHeader>
 
                             <div className="flex-grow" />
 
                             {/* Bottom Section */}
                             <div className="space-y-4">
-                                <Button variant="ghost" className="w-full justify-start" asChild>
-                                    <Link href="/upload">Upload</Link>
-                                </Button>
-
                                 <div className="flex items-center justify-between">
                                     {session ? (
                                         <>
@@ -98,32 +76,10 @@ const Navbar = async () => {
                         </SheetContent>
                     </Sheet>
                     <div className='flex gap-4'>
-                        <Link
-                            href="/"
-                            className="font-bold text-lg transition-transform transform hover:scale-105 hover:text-primary"
-                        >
-                            SAMS
-                        </Link>
-                        <Link
-                            href="/community"
-                            className="text-lg transition-transform transform hover:scale-105 hover:text-primary hidden md:inline"
-                        >
-                            Community
-                        </Link>
+                        SAMS
                     </div>
                 </div>
-
-                {/* Middle: SearchBar - always visible */}
-                <div className="flex-1">
-                    <SearchBar />
-                </div>
-
-                {/* Right: Desktop Navigation */}
                 <nav className="hidden md:flex items-center space-x-4">
-                    <Button asChild variant="ghost">
-                        <Link href="/upload">Upload</Link>
-                    </Button>
-
                     {session ? (
                         <>
                             <DropdownMenu>
