@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import CommunityPage from "@/components/CommunityPage";
+import CommunityPage from "./CommunityPage";
 
 export default function CommunitySection() {
     const [documents, setDocuments] = useState([]);

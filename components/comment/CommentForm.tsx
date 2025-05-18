@@ -1,7 +1,7 @@
 import React from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { Textarea } from './ui/textarea'
-import { Button } from './ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Textarea } from '../ui/textarea'
+import { Button } from '../ui/button'
 
 const CommentForm = () => {
     return (

@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
-import CommunitySection from "@/components/CommunitySection";
+import CommunitySection from "@/components/documents/CommunitySection";
 
 export default function Home() {
   const communityRef = useRef<HTMLDivElement>(null);

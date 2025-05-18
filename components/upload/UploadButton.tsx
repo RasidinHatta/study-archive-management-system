@@ -2,10 +2,10 @@
 "use client"
 
 import React from 'react'
-import { Button } from './ui/button'
 import { FiUpload } from 'react-icons/fi'
 import { CldUploadButton } from 'next-cloudinary'
 import { useRouter } from 'next/navigation'
+import { Button } from '../ui/button'
 
 const UploadButton = ({ onUpload }: { onUpload: (info: any) => void }) => {
     const router = useRouter()

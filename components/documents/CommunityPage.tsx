@@ -1,10 +1,10 @@
 'use client'; // Ensuring this is a Client Component
 
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import Link from 'next/link';
-import DocumentsEmpty from './empty-states/DocumentsEmpty';
-import PDFCard from './documents/PDFCard';
-import { AnimatedContainer } from './animations/AnimatedContainer';
+import DocumentsEmpty from '../empty-states/DocumentsEmpty';
+import { AnimatedContainer } from '../animations/AnimatedContainer';
+import PDFCard from './PDFCard';
 
 interface Document {
   id: string;

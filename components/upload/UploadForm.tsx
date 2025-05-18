@@ -1,8 +1,8 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import CardWrapper from "./auth/CardWrapper";
-import { Button } from "./ui/button";
+import CardWrapper from "../auth/CardWrapper";
+import { Button } from "../ui/button";
 import {
   Form,
   FormControl,
@@ -10,13 +10,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
+} from "../ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DocumentSchema } from "@/lib/schemas";
 import { useState, useRef } from "react"; // ✅ Import useRef
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import { uploadDocCloudinary } from "@/actions/document";
 import { toast } from "sonner";
 

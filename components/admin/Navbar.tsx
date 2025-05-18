@@ -47,7 +47,7 @@ const Navbar = async () => {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className="w-56" align="end" forceMount>
                                                     <DropdownMenuItem asChild>
-                                                        <Link href="/profile">Profile</Link>
+                                                        <Link href="/admin/profile">Profile</Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem asChild>
                                                         <SignOutButton />
@@ -87,7 +87,7 @@ const Navbar = async () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-56" align="end" forceMount>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/profile">Profile</Link>
+                                        <Link href="/admin/profile">Profile</Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
                                         <SignOutButton />

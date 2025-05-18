@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import React from 'react'
-import { Button } from './ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { ModeToggle } from './theme/ModeToggle'
+import { Button } from '../ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { ModeToggle } from '../theme/ModeToggle'
 import { Menu } from 'lucide-react'
 import {
     Sheet,
@@ -10,11 +10,11 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger
-} from './ui/sheet'
-import SearchBar from './SearchBar'
-import { SignOutButton } from './auth/SignOutButton'
+} from '../ui/sheet'
+import { SignOutButton } from '../auth/SignOutButton'
 import { auth } from '@/auth'
-import UserAvatar from './user/UserAvatar'
+import UserAvatar from '../user/UserAvatar'
+import SearchBar from './SearchBar'
 
 const Navbar = async () => {
     const session = await auth()
