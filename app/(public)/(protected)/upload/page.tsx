@@ -1,4 +1,5 @@
-import UploadForm from '@/components/UploadForm'
+
+import UploadForm from '@/components/upload/UploadForm';
 import { Metadata } from 'next';
 import React from 'react'
 

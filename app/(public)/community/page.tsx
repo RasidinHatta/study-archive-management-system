@@ -1,7 +1,7 @@
 import React from 'react';
-import CommunityPage from '@/components/CommunityPage';
 import { getCommunityDocuments } from '@/data/document';
 import { Metadata } from 'next';
+import CommunityPage from '@/components/documents/CommunityPage';
 
 export const metadata: Metadata = {
   title: "Community | SAMS",
