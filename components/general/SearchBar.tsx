@@ -1,8 +1,8 @@
 "use client"
 
-import React from 'react'
-import { useRouter } from 'next/navigation'
-import { Search, X } from 'lucide-react'
+import React, { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Search } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,18 +22,39 @@ const formSchema = z.object({
 
 const SearchBar = () => {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const currentQuery = searchParams.get("q") || ""
+
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            search: "",
+            search: currentQuery,
         },
     })
 
-    const query = form.watch("search")
+    const query = form.watch("search") || ''
 
+    // Debounce navigation effect
+    useEffect(() => {
+        const trimmed = query.trim()
+        const timeoutId = setTimeout(() => {
+            if (trimmed) {
+                router.push(`/community?q=${encodeURIComponent(trimmed)}`)
+            } else {
+                router.push('/community')
+            }
+        }, 1500)
+
+        return () => clearTimeout(timeoutId)
+    }, [query, router])
+
+    // Immediate submit on Enter
     const onSubmit = (data: { search?: string }) => {
-        if (data.search?.trim()) {
-            router.push(`/search?q=${encodeURIComponent(data.search)}`)
+        const trimmed = data.search?.trim() || ''
+        if (trimmed) {
+            router.push(`/community?q=${encodeURIComponent(trimmed)}`)
+        } else {
+            router.push('/community')
         }
     }
 
@@ -56,6 +77,7 @@ const SearchBar = () => {
                                     type="search"
                                     placeholder="Search documents..."
                                     className="pl-10 pr-20"
+                                    autoComplete="off"
                                 />
                             </FormControl>
                         </FormItem>

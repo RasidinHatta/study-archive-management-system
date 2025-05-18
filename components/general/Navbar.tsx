@@ -54,7 +54,7 @@ const Navbar = async () => {
 
                             {/* Bottom Section */}
                             <div className="space-y-4">
-                                <Button variant="ghost" className="w-full justify-start" asChild>
+                                <Button className="w-full justify-start" asChild>
                                     <Link href="/upload">Upload</Link>
                                 </Button>
 
@@ -117,7 +117,7 @@ const Navbar = async () => {
 
                 {/* Right: Desktop Navigation */}
                 <nav className="hidden md:flex items-center space-x-4">
-                    <Button asChild variant="ghost">
+                    <Button asChild>
                         <Link href="/upload">Upload</Link>
                     </Button>
 
