@@ -69,3 +69,9 @@ export const UserImageSchema = z.object({
     }),
     format: z.string()
 })
+
+export const CommentSchema = z.object({
+  content: z.string().min(1, "Comment cannot be empty"),
+  documentId: z.string(),
+  parentId: z.string().optional(), // for nested replies, optional for now
+})

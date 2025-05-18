@@ -9,13 +9,14 @@ import { Role } from "./lib/generated/prisma"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(db),
+    basePath: "/api/auth",
     session: {
         strategy: "jwt",
-        maxAge: 60 * 30, // 30 minutes
-        updateAge: 60 * 5,
+        maxAge: 60 * 120, // 30 minutes
+        updateAge: 60 * 10,
     },
     jwt: {
-        maxAge: 60 * 30,
+        maxAge: 60 * 120,
     },
     ...authConfig,
     callbacks: {

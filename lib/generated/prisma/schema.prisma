@@ -33,6 +33,7 @@ model User {
   twoFactorEnabled      Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
   documents             Document[]
+  comments              Comment[]
 
   role Role @default(PUBLICUSER)
 
@@ -99,7 +100,7 @@ model TwoFactorConfirmation {
 }
 
 model Document {
-  id           String  @id @default(cuid())
+  id           String    @id @default(cuid())
   title        String
   description  String?
   url          String // Cloudinary secure URL
@@ -107,8 +108,27 @@ model Document {
   format       String? // Optional: pdf, jpg, png, etc.
   resourceType String? // image, raw, video, etc.
   userId       String
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Comment      Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  userId     String
+  documentId String
+  parentId   String? // For future nesting support
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  @@index([documentId])
+  @@index([parentId])
 }
