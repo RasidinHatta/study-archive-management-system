@@ -14,7 +14,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema } from '@/lib/schemas';
 import { adminLogin } from '@/actions/login';
 import CardWrapper from '../CardWrapper';
-import GoogleButton from '../GoogleButton';
 import Link from 'next/link';
 
 const AdminLoginForm = () => {
@@ -49,8 +48,8 @@ const AdminLoginForm = () => {
         <CardWrapper
             headerLabel="Welcome Back"
             title="Login"
-            backButtonHref="/register"
-            backButtonLabel="Dont have an account?"
+            backButtonHref="#"
+            backButtonLabel=""
             showSocial
         >
             <Form {...form}>

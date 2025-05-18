@@ -2,7 +2,6 @@
 import { auth } from "@/auth"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import TwoFactorToggle from "@/components/user/TwoFactorToggle "
 import ChangeImageForm from "@/components/user/ChangeImageForm"
 
 const ProfilePage = async () => {
@@ -66,23 +65,6 @@ const ProfilePage = async () => {
                     className="w-full px-3 py-2 rounded bg-background text-foreground border border-border"
                   />
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <label className="block text-sm font-medium">Two-Factor</label>
-                  <TwoFactorToggle initialValue={!!user?.twoFactorEnabled} />
-                </div>
-
-                {user?.emailVerified && (
-                  <div>
-                    <label className="block text-sm font-medium">Email Verified</label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={new Date(user.emailVerified).toLocaleString()}
-                      className="w-full px-3 py-2 rounded bg-background text-foreground border border-border"
-                    />
-                  </div>
-                )}
               </>
             )}
           </div>
