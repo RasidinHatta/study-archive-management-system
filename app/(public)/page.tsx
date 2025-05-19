@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { Suspense, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import CommunitySection from "@/components/documents/CommunitySection";
@@ -80,7 +80,9 @@ export default function Home() {
 
       {/* Community Page Section */}
       <div ref={communityRef}>
-        <CommunitySection />
+        <Suspense fallback={<div>Loading...</div>}>
+          <CommunitySection />
+        </Suspense>
       </div>
     </>
   );
