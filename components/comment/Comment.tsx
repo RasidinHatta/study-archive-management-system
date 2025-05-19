@@ -3,20 +3,7 @@
 import React, { useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import CommentForm from "./CommentForm";
-
-interface User {
-  name?: string | null;
-  image?: string | null;
-}
-
-interface CommentType {
-  id: string;
-  content: string;
-  user?: User | null;
-  replies?: CommentType[];
-  createdAt: Date;
-  parentId?: string | null;
-}
+import { CommentType, User } from "@/types";
 
 interface CommentProps {
   comment: CommentType;

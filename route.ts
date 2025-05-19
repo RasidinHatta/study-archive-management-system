@@ -1,12 +1,14 @@
 export const protectedRoute = [
     "/documents",
     "/profile",
-    "/upload"
+    "/upload",
+    "/testPage"
 ]
 
 export const publicRoute = [
     "/",
     "/community",
+    "/test",
 ]
 
 export const authRoute = [
@@ -15,7 +17,12 @@ export const authRoute = [
 ]
 
 export const adminRoute = [
-    "/admin/*"
+    "/admin",
+    "/admin/test",
+    "/admin/users",
+    "/admin/documents",
+    "/admin/profile",
+    "/admin/setting",
 ]
 
 export const adminLoginRoute = [

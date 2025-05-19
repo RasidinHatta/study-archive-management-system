@@ -1,7 +1,4 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import React from 'react';
-
 import { getCommunityDocuments } from '@/data/document';
 import { columns as documentColumns } from '@/components/admin/documents/columns';
 import { getAllUser } from '@/data/user';
@@ -10,12 +7,6 @@ import { DataTable as DocumentTable } from '@/components/admin/documents/data-ta
 import { DataTable as UserTable } from '@/components/admin/user/data-table'
 
 const AdminPage = async () => {
-  const session = await auth();
-
-  if (!session) {
-    redirect('/admin-login');
-  }
-
   const documents = await getCommunityDocuments();
   const users = (await getAllUser()) ?? [];
 
