@@ -1,6 +1,6 @@
 import NextAuth from "next-auth"
 import authConfig from "./auth.config"
-import { adminLoginRoute, adminRoute, authRoute, protectedRoute, publicRoute } from "./route";
+import { adminLoginRoute, adminRoute, authRoute, protectedRoute, publicRoute, userRoute } from "./route";
 import { getToken } from "next-auth/jwt";
 
 const { auth } = NextAuth(authConfig)
@@ -22,6 +22,7 @@ export default auth(async (req) => {
     const isPublicRoute = publicRoute.includes(nextUrl.pathname)
     const isAdminRoute = adminRoute.includes(nextUrl.pathname)
     const isAdminLoginRoute = adminLoginRoute.includes(nextUrl.pathname)
+    const isUserRoute = userRoute.includes(nextUrl.pathname)
 
     if (isLoggedIn && isAuthRoute) {
         return Response.redirect(`${basedUrl}`)
@@ -40,6 +41,9 @@ export default auth(async (req) => {
     }
     if (!isLoggedIn && isAdminRoute) {
         return Response.redirect(`${basedUrl}/admin-login`)
+    }
+    if (isLoggedIn && role === "PUBLICUSER" && isUserRoute) {
+        return Response.redirect(`${basedUrl}/access-denied`)
     }
 })
 

@@ -28,3 +28,7 @@ export const adminRoute = [
 export const adminLoginRoute = [
     "/admin-login"
 ]
+
+export const userRoute = [
+    "/testUser"
+]

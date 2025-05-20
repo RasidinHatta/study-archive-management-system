@@ -6,6 +6,7 @@ import { RegisterSchema } from "@/lib/schemas";
 import db from "@/prisma/prisma";
 import { generateVerificationToken } from "@/lib/token";
 import { sendVerificationEmail } from "@/lib/mail";
+import { Role } from "@/lib/generated/prisma/client";
 
 export const register = async (data: z.infer<typeof RegisterSchema>) => {
   try {
@@ -19,6 +20,7 @@ export const register = async (data: z.infer<typeof RegisterSchema>) => {
 
     const lowerCaseEmail = email.toLowerCase();
     const hashedPassword = await bcrypt.hash(password, 10);
+    const role = lowerCaseEmail.endsWith("@graduate.utm.my") ? Role.USER : Role.PUBLICUSER;
 
     const userExists = await db.user.findFirst({
       where: { email: lowerCaseEmail },
@@ -33,6 +35,7 @@ export const register = async (data: z.infer<typeof RegisterSchema>) => {
         email: lowerCaseEmail,
         name,
         password: hashedPassword,
+        role
       },
     });
 

@@ -2,7 +2,7 @@ import React from 'react'
 
 const testPage = () => {
   return (
-    <div>testPage</div>
+    <div>access not allow</div>
   )
 }
 
