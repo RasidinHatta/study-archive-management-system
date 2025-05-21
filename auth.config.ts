@@ -38,5 +38,6 @@ export default {
   ],
   pages: {
     signIn: "/login",
+    error: "/auth-error"
   },
 } satisfies NextAuthConfig

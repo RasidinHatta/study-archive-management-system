@@ -20,25 +20,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     ...authConfig,
     callbacks: {
-        async signIn({ user, account, profile }) {
+        async signIn({ user, account }) {
             const email = user.email?.toLowerCase();
             if (!email || !account) return false;
 
+            const existingUser = await db.user.findUnique({
+                where: { email },
+                include: { accounts: true },
+            });
+
+            // 🌐 GOOGLE LOGIN
             if (account.provider === 'google') {
-                // Check for existing user by email
-                let existingUser = await db.user.findUnique({ where: { email } });
+                // ❌ Block Google login if user exists with credentials
+                if (existingUser && existingUser.password) {
+                    throw new Error("OAuthAccountLinked"); // Redirects to error page
+                }
 
                 if (existingUser) {
-                    // Check if the user already has a linked Google account
-                    const existingAccount = await db.account.findFirst({
+                    // ✅ Link Google account if not already linked
+                    const existingGoogleAccount = await db.account.findFirst({
                         where: {
                             userId: existingUser.id,
                             provider: 'google',
                         },
                     });
 
-                    if (!existingAccount) {
-                        // Link the Google account to existing user
+                    if (!existingGoogleAccount) {
                         await db.account.create({
                             data: {
                                 userId: existingUser.id,
@@ -57,10 +64,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                     return true;
                 } else {
-                    // If user does not exist, create one
+                    // ✅ Create new Google user if not existing
                     const role = email.endsWith("@graduate.utm.my") ? Role.USER : Role.PUBLICUSER;
 
-                    existingUser = await db.user.create({
+                    const newUser = await db.user.create({
                         data: {
                             email,
                             name: user.name ?? '',
@@ -72,7 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                     await db.account.create({
                         data: {
-                            userId: existingUser.id,
+                            userId: newUser.id,
                             type: account.type,
                             provider: account.provider,
                             providerAccountId: account.providerAccountId,
@@ -89,22 +96,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
             }
 
-            // Handle credentials-based login and 2FA as usual
-            const existingUser = await getUserById(user.id as string);
-            if (!existingUser?.emailVerified) return false;
+            // 🔐 CREDENTIALS LOGIN
+            if (account.provider === 'credentials') {
+                // ❌ Block credentials login if password not set (Google-only user)
+                if (existingUser && !existingUser.password) {
+                    throw new Error("CredentialsAccountLinked");
+                }
 
-            if (existingUser.twoFactorEnabled) {
-                const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
-                if (!twoFactorConfirmation) return false;
+                if (!existingUser?.emailVerified) return false;
 
-                await db.twoFactorConfirmation.delete({
-                    where: { id: twoFactorConfirmation.id },
-                });
+                if (existingUser.twoFactorEnabled) {
+                    const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
+                    if (!twoFactorConfirmation) return false;
+
+                    await db.twoFactorConfirmation.delete({
+                        where: { id: twoFactorConfirmation.id },
+                    });
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
         },
-
         async jwt({ token }) {
             if (!token.sub) return token;
             const existingUser = await getUserById(token.sub);
