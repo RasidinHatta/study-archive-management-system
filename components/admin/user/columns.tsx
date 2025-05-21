@@ -3,10 +3,12 @@
 
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { User } from "@/lib/generated/prisma/client"
+import { RoleName, User } from "@/lib/generated/prisma/client"
 import { ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
 import Link from "next/link"
+
+type UserWithRole = User & { role: { name: string } };
 
 export const userColumns: ColumnDef<User>[] = [
   {
@@ -22,6 +24,7 @@ export const userColumns: ColumnDef<User>[] = [
   {
     accessorKey: "role",
     header: "Role",
+    cell: ({ row }) => (row.original as UserWithRole).role.name
   },
   {
     accessorKey: "emailVerified",

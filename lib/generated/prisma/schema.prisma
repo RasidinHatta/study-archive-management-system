@@ -15,7 +15,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum RoleName {
   ADMIN
   USER
   PUBLICUSER
@@ -35,7 +35,34 @@ model User {
   documents             Document[]
   comments              Comment[]
 
-  role Role @default(PUBLICUSER)
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        RoleName @unique
+  description String?
+
+  // Direct boolean permissions
+  createUser Boolean @default(false)
+  deleteUser Boolean @default(false)
+  updateUser Boolean @default(false)
+  readUser   Boolean @default(false)
+
+  createDocument Boolean @default(false)
+  updateDocument Boolean @default(false)
+  deleteDocument Boolean @default(false)
+  readDocument   Boolean @default(false)
+
+  createComment Boolean @default(false)
+  deleteComment Boolean @default(false)
+  readComment   Boolean @default(false)
+
+  users User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

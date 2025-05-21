@@ -1,7 +1,7 @@
 // app/(admin)/admin/users/page.tsx
 import { userColumns } from '@/components/admin/user/columns'
 import { DataTable } from '@/components/admin/user/data-table'
-import { getAllUser } from '@/data/user'
+import { getAllUserWithRole } from '@/data/user'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 const UserPage = async () => {
-  const userList = (await getAllUser()) ?? []
+  const userList = (await getAllUserWithRole()) ?? []
 
   return (
     <div className="p-4">

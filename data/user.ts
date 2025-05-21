@@ -9,6 +9,19 @@ export const getAllUser = async () => {
         return null
     }
 }
+export const getAllUserWithRole = async () => {
+    try {
+        const user = await db.user.findMany({
+            include: {
+                role: true
+            }
+        })
+        return user
+    } catch (error) {
+        console.log(error)
+        return null
+    }
+}
 
 export const getUserById = async (id: string) => {
     try {

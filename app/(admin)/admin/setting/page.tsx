@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import RBAC from '@/components/admin/rbac/RBAC';
 
 export const metadata: Metadata = {
   title: "Setting | SAMS",
@@ -18,7 +19,7 @@ const SettingPage = () => {
           <CardTitle>Role Management</CardTitle>
         </CardHeader>
         <CardContent>
-          Manage user roles and permissions to control access across the platform.
+          <RBAC />
         </CardContent>
       </Card>
 

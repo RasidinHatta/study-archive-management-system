@@ -6,12 +6,11 @@ import { RegisterSchema } from "@/lib/schemas";
 import db from "@/prisma/prisma";
 import { generateVerificationToken } from "@/lib/token";
 import { sendVerificationEmail } from "@/lib/mail";
-import { Role } from "@/lib/generated/prisma/client";
+import { RoleName } from "@/lib/generated/prisma";
 
 export const register = async (data: z.infer<typeof RegisterSchema>) => {
   try {
     const validatedData = RegisterSchema.parse(data);
-
     const { email, name, password, passwordConfirmation } = validatedData;
 
     if (password !== passwordConfirmation) {
@@ -19,46 +18,58 @@ export const register = async (data: z.infer<typeof RegisterSchema>) => {
     }
 
     const lowerCaseEmail = email.toLowerCase();
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const role = lowerCaseEmail.endsWith("@graduate.utm.my") ? Role.USER : Role.PUBLICUSER;
 
+    // Check if user already exists
     const userExists = await db.user.findFirst({
       where: { email: lowerCaseEmail },
     });
 
     if (userExists) {
-      return { error: "Email already is in use. Please try another one." };
+      return { error: "Email is already in use. Please try another one." };
     }
 
+    // Determine role
+    const roleName: RoleName = lowerCaseEmail.endsWith("@graduate.utm.my")
+      ? RoleName.USER
+      : RoleName.PUBLICUSER;
+
+    // Get Role from DB
+    const role = await db.role.findUnique({
+      where: { name: roleName },
+    });
+
+    if (!role) {
+      return { error: `Role "${roleName}" not found in the system.` };
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
     await db.user.create({
       data: {
         email: lowerCaseEmail,
         name,
         password: hashedPassword,
-        role
+        roleId: role.id,
       },
     });
 
-    const verificationToken = await generateVerificationToken(email)
+    // Generate and send verification token
+    const verificationToken = await generateVerificationToken(lowerCaseEmail);
+    await sendVerificationEmail(lowerCaseEmail, verificationToken.token);
 
-    await sendVerificationEmail(email, verificationToken.token)
-
-    return { success: "Email Verification Was Sent" };
+    return { success: "Verification email sent successfully." };
   } catch (error) {
     console.error("Register error:", error);
 
-    if ((error as { code: string }).code === "ETIMEDOUT") {
-      return {
-        error: "Unable to connect to the database. Please try again later.",
-      };
-    } else if ((error as { code: string }).code === "503") {
-      return {
-        error: "Service temporarily unavailable. Please try again later.",
-      };
+    const errorCode = (error as { code?: string }).code;
+    if (errorCode === "ETIMEDOUT") {
+      return { error: "Database timeout. Try again later." };
+    } else if (errorCode === "503") {
+      return { error: "Service unavailable. Try again later." };
     } else {
-      return {
-        error: "An unexpected error occurred. Please try again later.",
-      };
+      return { error: "An unexpected error occurred. Please try again." };
     }
   }
 };
