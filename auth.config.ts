@@ -36,17 +36,7 @@ export default {
 
         if (!passwordMatch) return null;
 
-        // Return the user object with role included
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          emailVerified: user.emailVerified,
-          twoFactorEnabled: user.twoFactorEnabled,
-          role: user.role, // Include the role
-          roleName: user.roleName // Include roleName if needed
-        };
+        return user;
       },
     })
   ],
