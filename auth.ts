@@ -6,7 +6,6 @@ import { getUserById } from "./data/user";
 import { getAccountByUserId } from "./data/account";
 import { getTwoFactorConfirmationByUserId } from "./data/verification-token";
 import { RoleName, Role } from "./lib/generated/prisma";
-import { getRoleById } from "./data/role";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -30,9 +29,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         include: { accounts: true },
       });
 
-      // 🌐 GOOGLE LOGIN
+      // GOOGLE LOGIN
       if (account.provider === "google") {
-        // ❌ Block Google login if user exists with credentials
+        // Block Google login if user exists with credentials
         if (existingUser && existingUser.password) {
           throw new Error("OAuthAccountLinked"); // Redirects to error page
         }
@@ -65,7 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           return true;
         } else {
-          // ✅ Create new Google user if not existing
+          // Create new Google user if not existing
 
           const roleName = email.endsWith("@graduate.utm.my")
             ? RoleName.USER
@@ -105,7 +104,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // 🔐 CREDENTIALS LOGIN
       if (account.provider === "credentials") {
-        // ❌ Block credentials login if password not set (Google-only user)
+        // Block credentials login if password not set (Google-only user)
         if (existingUser && !existingUser.password) {
           throw new Error("CredentialsAccountLinked");
         }

@@ -20,19 +20,33 @@ export default {
           where: {
             email: validatedCredentials.email,
           },
+          include: {
+            role: true // Include the role relation
+          }
         });
 
         if (!user || !user.password || !user.email) {
           return null;
         }
 
-        const passwordMatch = await bcrypt.compare(validatedCredentials.password, user.password);
-        if (!passwordMatch) {
-          console.log("wrong password")
-          return null
-        };
+        const passwordMatch = await bcrypt.compare(
+          validatedCredentials.password,
+          user.password
+        );
 
-        return user;
+        if (!passwordMatch) return null;
+
+        // Return the user object with role included
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          emailVerified: user.emailVerified,
+          twoFactorEnabled: user.twoFactorEnabled,
+          role: user.role, // Include the role
+          roleName: user.roleName // Include roleName if needed
+        };
       },
     })
   ],
@@ -40,4 +54,4 @@ export default {
     signIn: "/login",
     error: "/auth-error"
   },
-} satisfies NextAuthConfig
+} satisfies NextAuthConfig;
