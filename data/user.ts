@@ -31,8 +31,9 @@ export const getAllUserWithRole = async () => {
 export const getUserById = async (id: string) => {
     try {
         const user = await db.user.findUnique({
-            where: {
-                id
+            where: { id },
+            include: {
+                role: true, // ✅ This is required to get `role.name`
             }
         })
         return user

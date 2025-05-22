@@ -142,6 +142,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       token.twoFactorEnabled = existingUser.twoFactorEnabled;
       token.emailVerified = existingUser.emailVerified;
       token.roleName = existingUser.roleName
+      token.role = existingUser.role
       return token;
     },
     async session({ token, session }) {
@@ -154,7 +155,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           twoFactorEnabled: token.twoFactorEnabled,
           emailVerified: token.emailVerified,
           image: token.image as string,
-          roleId: token.roleId,
+          roleName: token.roleName as string, // ✅ Add this line
+          role: token.role
         },
       };
     }

@@ -12,8 +12,7 @@ export default auth(async (req) => {
   console.log('Is Logged In:', !!req.auth);
   console.log('Request URL:', req.nextUrl.pathname);
 
-  const role = token?.roleName || "PUBLIC";
-
+  const role = token?.role.name || "PUBLIC";
   const isAdmin = role === "ADMIN";
   console.log(isAdmin, role)
   const isLoggedIn = !!req.auth;
@@ -27,11 +26,8 @@ export default auth(async (req) => {
   const isAdminLoginRoute = adminLoginRoute.includes(nextUrl.pathname);
   const isUserRoute = userRoute.includes(nextUrl.pathname);
 
-  if (isLoggedIn && isAuthRoute && !isAdmin) {
+  if (isLoggedIn && isAuthRoute) {
     return Response.redirect(`${basedUrl}`);
-  }
-  if (isLoggedIn && isAdminLoginRoute && isAdmin) {
-    return Response.redirect(`${basedUrl}/admin`);
   }
   if (isAdminRoute && !isAdmin && isLoggedIn) {
     return Response.redirect(`${basedUrl}`);
