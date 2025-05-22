@@ -2,7 +2,6 @@ import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { adminLoginRoute, adminRoute, authRoute, protectedRoute, publicRoute, userRoute } from "./route";
 import { getToken } from "next-auth/jwt";
-import { Role, RoleName } from "./lib/generated/prisma";
 
 
 const { auth } = NextAuth(authConfig);

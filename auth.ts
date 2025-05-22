@@ -137,11 +137,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       if (!existingUser) return token;
 
-      return {
-        ...token,
-        role: existingUser.role,
-        roleName: existingUser.role?.name
-      };
+      const existingAccount = await getAccountByUserId(existingUser.id);
+      token.isOauth = !!existingAccount;
+      token.name = existingUser.name;
+      token.email = existingUser.email;
+      token.image = existingUser.image;
+      token.twoFactorEnabled = existingUser.twoFactorEnabled;
+      token.emailVerified = existingUser.emailVerified;
+      token.roleName = existingUser.roleName
+      token.role = existingUser.role
+      return token;
     },
     async session({ token, session }) {
       return {
