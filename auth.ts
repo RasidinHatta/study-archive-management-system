@@ -9,7 +9,6 @@ import { RoleName, Role } from "./lib/generated/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
-  basePath: "/api/auth",
   session: {
     strategy: "jwt",
     maxAge: 60 * 120, // 2 hours
@@ -131,19 +130,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token }) {
       if (!token.sub) return token;
 
-      const existingUser = await getUserById(token.sub);
+      const existingUser = await db.user.findUnique({
+        where: { id: token.sub },
+        include: { role: true } // Explicitly include role
+      });
+
       if (!existingUser) return token;
 
-      const existingAccount = await getAccountByUserId(existingUser.id);
-      token.isOauth = !!existingAccount;
-      token.name = existingUser.name;
-      token.email = existingUser.email;
-      token.image = existingUser.image;
-      token.twoFactorEnabled = existingUser.twoFactorEnabled;
-      token.emailVerified = existingUser.emailVerified;
-      token.roleName = existingUser.roleName
-      token.role = existingUser.role
-      return token;
+      return {
+        ...token,
+        role: existingUser.role,
+        roleName: existingUser.role?.name
+      };
     },
     async session({ token, session }) {
       return {

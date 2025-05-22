@@ -9,12 +9,9 @@ const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-  console.log('Is Logged In:', !!req.auth);
-  console.log('Request URL:', req.nextUrl.pathname);
+  const role = token?.roleName as string || "PUBLIC";
 
-  const role = token?.role.name || "PUBLIC";
   const isAdmin = role === "ADMIN";
-  console.log(isAdmin, role)
   const isLoggedIn = !!req.auth;
   const { nextUrl } = req;
   const basedUrl = process.env.BASED_URL;
@@ -25,6 +22,9 @@ export default auth(async (req) => {
   const isAdminRoute = adminRoute.includes(nextUrl.pathname);
   const isAdminLoginRoute = adminLoginRoute.includes(nextUrl.pathname);
   const isUserRoute = userRoute.includes(nextUrl.pathname);
+
+  console.log("Role:", role);
+  console.log("Path:", nextUrl.pathname);
 
   if (isLoggedIn && isAuthRoute) {
     return Response.redirect(`${basedUrl}`);
