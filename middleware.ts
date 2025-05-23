@@ -17,12 +17,21 @@ export default auth(async (req) => {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
 
-  // 1. First handle public routes that don't need authentication
-  if (publicRoute.includes(path)) {
-    return; // Allow access without any checks
-  }
+  // Helper functions to match paths with startsWith
+  const matchesAny = (routes: string[], p: string) => 
+    routes.some(route => p === route || p.startsWith(route + "/"));
 
-  // 2. Safely retrieve token with error handling
+  const isPublicRoute = matchesAny(publicRoute, path);
+  const isAuthRoute = matchesAny(authRoute, path);
+  const isAdminRoute = matchesAny(adminRoute, path);
+  const isAdminLoginRoute = matchesAny(adminLoginRoute, path);
+  const isProtectedRoute = matchesAny(protectedRoute, path);
+  const isUserRoute = matchesAny(userRoute, path);
+
+  // 1. Public routes - no auth needed
+  if (isPublicRoute) return;
+
+  // 2. Get token safely
   let token;
   try {
     token = await getToken({ 
@@ -30,71 +39,55 @@ export default auth(async (req) => {
       secret: process.env.NEXTAUTH_SECRET,
       secureCookie: process.env.NODE_ENV === 'production'
     });
-    
-    if (!token) {
-      console.warn('No token found for protected route:', path);
-      if (protectedRoute.includes(path) || adminRoute.includes(path)) {
-        return Response.redirect(`${basedUrl}/login`);
-      }
-      return;
-    }
   } catch (error) {
     console.error('Token retrieval error:', error);
-    // For API routes, return JSON error
     if (path.startsWith('/api')) {
       return new Response(JSON.stringify({ 
         error: 'Authentication error',
         message: 'Could not verify your session'
-      }), {
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     return Response.redirect(`${basedUrl}/auth-error`);
   }
 
   const role = token?.roleName;
   const isAdmin = role === "ADMIN";
-  const isLoggedIn = !!token; // Use token presence instead of req.auth for reliability
+  const isLoggedIn = !!token;
 
-  console.log(`Access Attempt: Role=${role}, Path=${path}`);
+  console.log(`Middleware check - Role: ${role}, Path: ${path}`);
 
-  // 3. Handle auth routes (login/signup) for already authenticated users
-  if (isLoggedIn && authRoute.includes(path)) {
+  // 3. Auth routes (login/signup) - redirect logged in users
+  if (isLoggedIn && isAuthRoute) {
     return Response.redirect(`${basedUrl}`);
   }
 
-  // 4. Handle admin-specific routes
-  if (adminRoute.includes(path)) {
+  // 4. Admin routes
+  if (isAdminRoute) {
     if (!isLoggedIn) {
       return Response.redirect(`${basedUrl}/admin-login`);
     }
     if (!isAdmin) {
-      console.warn(`Non-admin user attempted to access admin route: ${role} at ${path}`);
       return Response.redirect(`${basedUrl}/access-denied`);
     }
-    return; // Allow admin access
+    return; // allow admin access
   }
 
-  // 5. Handle admin login route for already logged-in admins
-  if (isLoggedIn && adminLoginRoute.includes(path)) {
+  // 5. Admin login route - redirect logged in admins
+  if (isLoggedIn && isAdminLoginRoute) {
     return Response.redirect(`${basedUrl}/admin`);
   }
 
-  // 6. Handle protected routes for unauthenticated users
-  if (!isLoggedIn && protectedRoute.includes(path)) {
+  // 6. Protected routes - redirect unauthenticated users
+  if (!isLoggedIn && isProtectedRoute) {
     return Response.redirect(`${basedUrl}/login`);
   }
 
-  // 7. Handle user routes for non-authorized roles
-  if (isLoggedIn && role === "PUBLICUSER" && userRoute.includes(path)) {
-    console.warn(`Public user attempted to access user route: ${path}`);
+  // 7. User routes - restrict PUBLICUSER role
+  if (isLoggedIn && role === "PUBLICUSER" && isUserRoute) {
     return Response.redirect(`${basedUrl}/access-denied`);
   }
 
-  // Default allow with warning for unhandled cases
+  // 8. Default allow for all others (you can customize this)
   console.warn(`No explicit rule for route: ${path}, role: ${role}`);
 });
 
