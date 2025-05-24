@@ -1,4 +1,4 @@
-import { getCommunityDocuments } from '@/data/document';
+import { getAllDocumentWithUserAndComment } from '@/data/document';
 import React from 'react';
 import { Metadata } from 'next';
 import { DataTable } from '@/components/admin/documents/data-table';
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const DocumentsPage = async () => {
-  const documents = await getCommunityDocuments();
+  const documents = await getAllDocumentWithUserAndComment();
 
   return (
     <div className="p-4">

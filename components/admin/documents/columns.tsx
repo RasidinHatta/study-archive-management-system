@@ -1,17 +1,28 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Prisma } from "@/lib/generated/prisma/client"
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
+import DocumentActionCell from "./action-cell"
+import { Document, User } from "@/lib/generated/prisma/client"
 
-export type Document = Prisma.DocumentGetPayload<{ include: { user: true } }>
+type DocumentWithUser = Document & {
+  user: User
+}
 
-export const columns: ColumnDef<Document>[] = [
+
+export const columns: ColumnDef<DocumentWithUser>[] = [
     {
         accessorKey: "title",
-        header: "Title",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Title
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
         enableSorting: true,
     },
     {
@@ -20,7 +31,16 @@ export const columns: ColumnDef<Document>[] = [
     },
     {
         accessorKey: "format",
-        header: "Format",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Format
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        enableSorting: true,
     },
     {
         accessorKey: "user",
@@ -32,44 +52,46 @@ export const columns: ColumnDef<Document>[] = [
     },
     {
         accessorKey: "createdAt",
-        header: "Created",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Created
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
         cell: ({ row }) => {
             return new Date(row.original.createdAt).toLocaleDateString()
         },
+        enableSorting: true,
     },
     {
         accessorKey: "updatedAt",
-        header: "Last Edited",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Last Edited
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
         cell: ({ row }) => {
             return new Date(row.original.updatedAt).toLocaleDateString()
         },
+        enableSorting: true,
     },
     {
-        id: "action",
-        header: "Action",
+        id: "actions",
         cell: ({ row }) => {
-            const url = row.original.url
+            const document = row.original;
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => {
-                                // Open URL in a new tab
-                                window.open(url, "_blank")
-                            }}
-                        >
-                            View Document
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
+                <DocumentActionCell
+                    documentId={document.id}
+                    documentTitle={document.title}
+                />
+            );
         },
     }
 ]

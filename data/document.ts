@@ -8,6 +8,19 @@ export const getCommunityDocuments = async () => {
     return documents;
 };
 
+export const getAllDocumentWithUserAndComment = async () => {
+    const documents = await db.document.findMany({
+        include: {
+            user: true,
+            Comment: true
+        },
+        orderBy: {
+            updatedAt: "desc"
+        }
+    })
+    return documents
+}
+
 
 export const getDocumentById = async (id: string) => {
     try {
