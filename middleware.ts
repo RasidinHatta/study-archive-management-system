@@ -17,21 +17,34 @@ export default auth(async (req) => {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
 
-  // Helper functions to match paths with startsWith
   const matchesAny = (routes: string[], p: string) => 
     routes.some(route => p === route || p.startsWith(route + "/"));
 
   const isPublicRoute = matchesAny(publicRoute, path);
   const isAuthRoute = matchesAny(authRoute, path);
   const isAdminRoute = matchesAny(adminRoute, path);
-  const isAdminLoginRoute = matchesAny(adminLoginRoute, path);
   const isProtectedRoute = matchesAny(protectedRoute, path);
   const isUserRoute = matchesAny(userRoute, path);
 
-  // 1. Public routes - no auth needed
-  if (isPublicRoute) return;
+  // 1. Public routes - check if admin is trying to access
+  if (isPublicRoute) {
+    try {
+      const token = await getToken({ 
+        req, 
+        secret: process.env.NEXTAUTH_SECRET,
+        secureCookie: process.env.NODE_ENV === 'production'
+      });
+      
+      if (token?.roleName === "ADMIN") {
+        return Response.redirect(`${basedUrl}/admin`);
+      }
+    } catch (error) {
+      console.error('Token check error:', error);
+    }
+    return; // Allow non-admin access to public routes
+  }
 
-  // 2. Get token safely
+  // 2. Get token safely for other routes
   let token;
   try {
     token = await getToken({ 
@@ -49,46 +62,32 @@ export default auth(async (req) => {
     }
     return Response.redirect(`${basedUrl}/auth-error`);
   }
-
+  
   const role = token?.roleName;
   const isAdmin = role === "ADMIN";
   const isLoggedIn = !!token;
 
-  console.log(`Middleware check - Role: ${role}, Path: ${path}`);
-
-  // 3. Auth routes (login/signup) - redirect logged in users
-  if (isLoggedIn && isAuthRoute) {
-    return Response.redirect(`${basedUrl}`);
+  // 3. Auth routes (login/signup/admin-login) - redirect logged in users
+  if (isLoggedIn && (isAuthRoute || matchesAny(adminLoginRoute, path))) {
+    return Response.redirect(isAdmin ? `${basedUrl}/admin` : `${basedUrl}`);
   }
 
   // 4. Admin routes
   if (isAdminRoute) {
-    if (!isLoggedIn) {
-      return Response.redirect(`${basedUrl}/admin-login`);
-    }
-    if (!isAdmin) {
-      return Response.redirect(`${basedUrl}/access-denied`);
-    }
-    return; // allow admin access
+    if (!isLoggedIn) return Response.redirect(`${basedUrl}/admin-login`);
+    if (!isAdmin) return Response.redirect(`${basedUrl}/access-denied`);
+    return;
   }
 
-  // 5. Admin login route - redirect logged in admins
-  if (isLoggedIn && isAdminLoginRoute) {
-    return Response.redirect(`${basedUrl}/admin`);
-  }
-
-  // 6. Protected routes - redirect unauthenticated users
+  // 5. Protected routes - redirect unauthenticated users
   if (!isLoggedIn && isProtectedRoute) {
     return Response.redirect(`${basedUrl}/login`);
   }
 
-  // 7. User routes - restrict PUBLICUSER role
+  // 6. User routes - restrict PUBLICUSER role
   if (isLoggedIn && role === "PUBLICUSER" && isUserRoute) {
     return Response.redirect(`${basedUrl}/access-denied`);
   }
-
-  // 8. Default allow for all others (you can customize this)
-  console.warn(`No explicit rule for route: ${path}, role: ${role}`);
 });
 
 export const config = {

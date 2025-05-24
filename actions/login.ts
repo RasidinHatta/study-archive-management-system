@@ -98,6 +98,11 @@ export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
     return { error: "User not found" };
   }
 
+  // Check if user is an admin
+  if (user.roleName !== "ADMIN") {
+    return { error: "User not admin" };
+  }
+
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
   if (!isPasswordCorrect) {
     return { error: "Wrong Password" };
@@ -121,7 +126,7 @@ export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
     throw error;
   }
 
-  return { success: "User logged in successfully!" };
+  return { success: "Admin logged in successfully!" };
 }
 
 
