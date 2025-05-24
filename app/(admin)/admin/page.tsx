@@ -1,5 +1,5 @@
 import React from 'react';
-import { getCommunityDocuments } from '@/data/document';
+import { getAllDocumentWithUserAndComment } from '@/data/document';
 import { columns as documentColumns } from '@/components/admin/documents/columns';
 import { getAllUserWithRole } from '@/data/user';
 import { userColumns } from '@/components/admin/user/columns';
@@ -7,7 +7,7 @@ import { DataTable as DocumentTable } from '@/components/admin/documents/data-ta
 import { DataTable as UserTable } from '@/components/admin/user/data-table'
 
 const AdminPage = async () => {
-  const documents = await getCommunityDocuments();
+  const documents = await getAllDocumentWithUserAndComment();
   const users = (await getAllUserWithRole()) ?? [];
 
   return (
