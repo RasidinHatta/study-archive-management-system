@@ -5,10 +5,14 @@ import { getAllUserWithRole } from '@/data/user';
 import { userColumns } from '@/components/admin/user/columns';
 import { DataTable as DocumentTable } from '@/components/admin/documents/data-table'
 import { DataTable as UserTable } from '@/components/admin/user/data-table'
+import { CommentsDataTable } from '@/components/admin/comments/data-table';
+import { commentColumns } from '@/components/admin/comments/columns';
+import { getAllCommentWithDocAndUser } from '@/data/comment';
 
 const AdminPage = async () => {
   const documents = await getAllDocumentWithUserAndComment();
   const users = (await getAllUserWithRole()) ?? [];
+  const comments = await getAllCommentWithDocAndUser();
 
   return (
     <div className="p-4 space-y-12">
@@ -34,6 +38,12 @@ const AdminPage = async () => {
       <section>
         <h1 className="text-xl font-semibold mb-4">User List</h1>
         <UserTable columns={userColumns} data={users} />
+      </section>
+
+      {/* Comment List Table */}
+      <section>
+        <h1 className="text-xl font-semibold mb-4">Comment List</h1>
+        <CommentsDataTable columns={commentColumns} data={comments} />
       </section>
     </div>
   );
