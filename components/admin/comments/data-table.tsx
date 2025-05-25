@@ -32,30 +32,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react"
+import { CommentWithRelations } from "./columns"
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface DataTableProps {
+  columns: ColumnDef<CommentWithRelations, unknown>[]
+  data: CommentWithRelations[]
 }
 
-export function CommentsDataTable<TData, TValue>({
+export function CommentsDataTable({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
 
-  const globalFilterFn: FilterFn<TData> = (row, _columnId, filterValue) => {
-    const content = String(row.getValue("content") ?? "").toLowerCase()
-    const userName = String(row.getValue("userName") ?? "").toLowerCase() // Assuming you include user name
-    const documentTitle = String(row.getValue("documentTitle") ?? "").toLowerCase() // Assuming you include document title
+  const globalFilterFn: FilterFn<CommentWithRelations> = (row, _columnId, filterValue) => {
+    const content = String(row.original.content).toLowerCase()
+    const userName = String(row.original.user.name || "").toLowerCase()
+    const userEmail = String(row.original.user.email || "").toLowerCase()
+    const documentTitle = String(row.original.document.title).toLowerCase()
     const search = String(filterValue).toLowerCase()
-    
+
     return (
-      content.includes(search) || 
-      userName.includes(search) || 
+      content.includes(search) ||
+      userName.includes(search) ||
+      userEmail.includes(search) ||
       documentTitle.includes(search)
     )
   }
