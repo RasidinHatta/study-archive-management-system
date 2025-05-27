@@ -1,25 +1,20 @@
 "use client"
 
 import React, { useState } from 'react'
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FormError } from '../FormError';
-import { FormSuccess } from '../FormSuccess';
 import { useForm } from 'react-hook-form';
 import { z } from "zod"
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema } from '@/lib/schemas';
 import { adminLogin } from '@/actions/login';
 import CardWrapper from '../CardWrapper';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 const AdminLoginForm = () => {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("")
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -34,16 +29,20 @@ const AdminLoginForm = () => {
         setLoading(true);
         adminLogin(data).then((res) => {
             if (res.error) {
-                setError(res.error);
+                toast.error(res.error, {
+                    duration: 5000
+                });
                 setLoading(false);
             }
             if (res.success) {
-                setError("");
-                setSuccess(res.success);
+                toast.success(res.success, {
+                    duration: 3000
+                });
                 setLoading(false);
             }
         });
     };
+    
     return (
         <CardWrapper
             headerLabel="Welcome Back"
@@ -92,8 +91,6 @@ const AdminLoginForm = () => {
                             )}
                         />
                     </div>
-                    <FormSuccess message={success} />
-                    <FormError message={error} />
                     <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? "Loading..." : "Login"}
                     </Button>
@@ -108,4 +105,4 @@ const AdminLoginForm = () => {
     );
 }
 
-export default AdminLoginForm
+export default AdminLoginForm;

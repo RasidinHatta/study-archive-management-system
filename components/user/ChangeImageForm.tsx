@@ -1,17 +1,10 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Form } from '../ui/form';
-import { UserImageSchema } from '@/lib/schemas';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { FormError } from '../auth/FormError';
-import { FormSuccess } from '../auth/FormSuccess';
-import { Button } from '../ui/button';
 import { userImageUpload } from '@/actions/image';
 import ChangeUserImage from './ChangeUserImage';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const ChangeImageForm = () => {
     const [loading, setLoading] = useState(false);
@@ -19,47 +12,47 @@ const ChangeImageForm = () => {
     const [success, setSuccess] = useState("");
     const router = useRouter();
 
+    const handleImageUpload = async (info: any) => {
+        if (!info?.public_id || !info?.format) {
+            setError("Invalid image data received");
+            return;
+        }
 
-    const form = useForm<z.infer<typeof UserImageSchema>>({
-        resolver: zodResolver(UserImageSchema),
-        defaultValues: {
-            publicId: "",
-            format: "png"
-        },
-    });
-
-    const onSubmit = async (data: z.infer<typeof UserImageSchema>) => {
         setLoading(true);
-        userImageUpload(data).then((res) => {
-            if (res.error) {
-                setError(res.error);
-                setLoading(false);
+        setError("");
+        setSuccess("");
+
+        try {
+            const result = await userImageUpload({
+                publicId: info.public_id,
+                format: info.format
+            });
+
+            if (result?.error) {
+                toast.error(result.error, {
+                    duration: 5000
+                })
+            } else if (result?.success) {
+                toast.success(result.success, {
+                    duration: 3000
+                })
+                router.refresh();
             }
-            if (res.success) {
-                setError("");
-                setSuccess(res.success);
-                setLoading(false);
-                router.refresh(); // ✅ Refresh the page
-            }
-        });
+        } catch (err) {
+            setError("Failed to process image upload");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <ChangeUserImage
-                    onUpload={(info) => {
-                        form.setValue("publicId", info.public_id);
-                        form.setValue("format", info.format);
-                    }}
-                />
-                <FormSuccess message={success} />
-                <FormError message={error} />
-                <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Updating" : "Update Image"}
-                </Button>
-            </form>
-        </Form>
+        <div className="space-y-4">
+            <ChangeUserImage
+                onUpload={handleImageUpload}
+                disabled={loading}
+            />
+            {loading && <p className="text-sm text-muted-foreground">Processing image...</p>}
+        </div>
     )
 }
 

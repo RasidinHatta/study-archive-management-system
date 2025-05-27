@@ -48,6 +48,12 @@ const Navbar = async () => {
                                 >
                                     Community
                                 </Link>
+                                <Link
+                                    href="/documents"
+                                    className="text-lg transition-transform transform hover:scale-105 hover:text-primary"
+                                >
+                                    MyDocument
+                                </Link>
                             </SheetHeader>
 
                             <div className="flex-grow" />
@@ -106,6 +112,12 @@ const Navbar = async () => {
                             className="text-lg transition-transform transform hover:scale-105 hover:text-primary hidden md:inline"
                         >
                             Community
+                        </Link>
+                        <Link
+                            href="/documents"
+                            className="text-lg transition-transform transform hover:scale-105 hover:text-primary hidden md:inline"
+                        >
+                            MyDocument
                         </Link>
                     </div>
                 </div>

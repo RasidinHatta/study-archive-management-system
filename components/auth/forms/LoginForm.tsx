@@ -5,8 +5,6 @@ import React, { useState, useTransition } from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FormError } from '../FormError';
-import { FormSuccess } from '../FormSuccess';
 import { useForm } from 'react-hook-form';
 import { z } from "zod"
 
@@ -16,6 +14,7 @@ import { login } from '@/actions/login';
 import CardWrapper from '../CardWrapper';
 import GoogleButton from '../GoogleButton';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 const LoginForm = () => {
     const [isPending, startTransition] = useTransition()
@@ -39,11 +38,15 @@ const LoginForm = () => {
         startTransition(() => {
             login(data).then((res) => {
                 if (res.error) {
-                    setError(res.error);
+                    toast.error(res.error, {
+                        duration: 5000
+                    });
                 }
                 if (res.success) {
                     form.reset(); // Only reset on full success
-                    setSuccess(res.success);
+                    toast.success(res.success, {
+                        duration: 3000
+                    });
                 }
                 if (res.twoFactor) {
                     setShowTwoFactor(true);
@@ -122,8 +125,6 @@ const LoginForm = () => {
                             </>
                         )}
                     </div>
-                    <FormSuccess message={success} />
-                    <FormError message={error} />
                     <Button type="submit" className="w-full" disabled={isPending}>
                         {showTwoFactor
                             ? (isPending ? "Confirm..." : "Confirm")

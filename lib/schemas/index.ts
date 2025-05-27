@@ -53,13 +53,13 @@ export const NewPasswordSchema = z.object({
 });
 
 export const DocumentSchema = z.object({
-  title: z.string().min(1, {
-    message: "Title is required",
-  }),
-  description: z.string().optional(),
-  publicId: z.string().optional(),
-  format: z.string().optional(),
-  resourceType: z.string().optional(),
+    title: z.string().min(1, {
+        message: "Title is required",
+    }),
+    description: z.string().optional(),
+    publicId: z.string().optional(),
+    format: z.string().optional(),
+    resourceType: z.string().optional(),
 });
 
 
@@ -71,7 +71,25 @@ export const UserImageSchema = z.object({
 })
 
 export const CommentSchema = z.object({
-  content: z.string().min(1, "Comment cannot be empty"),
-  documentId: z.string(),
-  parentId: z.string().optional(), // for nested replies, optional for now
+    content: z.string().min(1, "Comment cannot be empty"),
+    documentId: z.string(),
+    parentId: z.string().optional(), // for nested replies, optional for now
 })
+
+export const ProfileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  twoFactorEnabled: z.boolean(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine(data => {
+  // Only validate passwords if any password field is filled
+  if (data.newPassword || data.currentPassword || data.confirmPassword) {
+    return data.newPassword === data.confirmPassword;
+  }
+  return true;
+}, {
+  message: "New passwords don't match",
+  path: ["confirmPassword"],
+});

@@ -4,33 +4,39 @@ import React from 'react'
 import { Button } from '../ui/button'
 import { CldUploadButton } from 'next-cloudinary'
 import { FiUpload } from 'react-icons/fi'
-import { useRouter } from 'next/navigation'
 
+interface ChangeUserImageProps {
+    onUpload: (info: any) => Promise<void>;
+    disabled?: boolean;
+}
 
-const ChangeUserImage = ({ onUpload }: { onUpload: (info: any) => void }) => {
-    const router = useRouter()
+const ChangeUserImage = ({ onUpload, disabled }: ChangeUserImageProps) => {
     return (
-        <Button asChild>
+        <Button asChild disabled={disabled}>
             <CldUploadButton
                 onSuccess={(result: any) => {
-                    onUpload(result.info) // Pass Cloudinary info to parent
-                    setTimeout(() => router.refresh(), 1000)
-                    console.log(result)
+                    if (result?.info) {
+                        onUpload(result.info);
+                    }
+                }}
+                onError={(error: any) => {
+                    console.error("Upload error:", error);
                 }}
                 options={{
                     clientAllowedFormats: ['png', 'jpg', 'jpeg'],
-                    maxFileSize: 5242880, // 5MB
+                    maxFileSize: 5242880,
                     multiple: false,
-                    cropping: true,           // ✅ Enable cropping UI
-                    croppingAspectRatio: 1.0, // ✅ Enforce 1:1 ratio
+                    cropping: true,
+                    croppingAspectRatio: 1.0,
                     croppingShowBackButton: true,
-                    showSkipCropButton: false, // ✅ Force cropping step
+                    showSkipCropButton: false,
+                    resourceType: 'image',
                 }}
                 uploadPreset="sams-image"
             >
-                <div className="flex gap-2">
-                    <FiUpload className="w-5 h-5" />
-                    Upload Image
+                <div className="flex gap-2 items-center">
+                    <FiUpload className="w-4 h-4" />
+                    {disabled ? "Uploading..." : "Change Profile Picture"}
                 </div>
             </CldUploadButton>
         </Button>

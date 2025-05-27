@@ -8,6 +8,15 @@ export const getCommunityDocuments = async () => {
     return documents;
 };
 
+export const getMyDocuments = async (userId: string) => {
+    const documents = await db.document.findMany({
+        where: { userId },
+        include: { user: true }, // Fetch author details
+        orderBy: { createdAt: "desc" }, // Newest first
+    });
+    return documents;
+}
+
 export const getAllDocumentWithUserAndComment = async () => {
     const documents = await db.document.findMany({
         include: {

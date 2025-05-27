@@ -19,58 +19,60 @@ export const userImageUpload = async (data: z.infer<typeof UserImageSchema>) => 
     try {
         const validatedData = UserImageSchema.parse(data);
         const { publicId, format } = validatedData;
+        
+        // Validate publicId format to prevent injection
+        if (!/^[a-zA-Z0-9_-]+$/.test(publicId)) {
+            return { error: "Invalid image identifier" };
+        }
+
         const url = `https://res.cloudinary.com/${cloudinaryAppName}/image/upload/${publicId}.${format}`;
 
-        // 🔥 Fetch old image public ID
+        // Get existing user data
         const existingUser = await db.user.findUnique({
             where: { id: userId },
             select: { image: true },
         });
 
-        if (existingUser?.image) {
-            // Extract public ID from full URL
-            const oldUrl = existingUser.image;
-            const matches = oldUrl.match(/\/upload\/([^\.\/]+)\./);
-            const oldPublicId = matches?.[1];
-
-            console.log("old public id ", oldPublicId)
-
-            if (oldPublicId && oldPublicId !== publicId) {
-                await oldImageDelete(oldPublicId); // Delete old image if different
-            }
-        }
-
+        // Update user with new image URL
         await db.user.update({
             where: { id: userId },
             data: { image: url },
         });
 
-        return { success: "User image updated!" };
+        // Delete old image if it exists and is different from new one
+        if (existingUser?.image) {
+            const matches = existingUser.image.match(/\/upload\/([^\.\/]+)\./);
+            const oldPublicId = matches?.[1];
+
+            if (oldPublicId && oldPublicId !== publicId) {
+                try {
+                    await cloudinary.v2.uploader.destroy(oldPublicId);
+                    console.log(`Deleted old image: ${oldPublicId}`);
+                } catch (deleteError) {
+                    console.error("Failed to delete old image:", deleteError);
+                    // Don't fail the whole operation if deletion fails
+                }
+            }
+        }
+
+        return { success: "User image updated successfully!" };
+
     } catch (error) {
         console.error("Upload error:", error);
+        
+        // Handle specific error cases
+        if (error instanceof z.ZodError) {
+            return { error: "Invalid image data format" };
+        }
 
-        if ((error as { code: string }).code === "ETIMEDOUT") {
-            return {
-                error: "Unable to connect to the database. Please try again later.",
-            };
-        } else if ((error as { code: string }).code === "503") {
-            return {
-                error: "Service temporarily unavailable. Please try again later.",
-            };
+        const errorCode = (error as { code?: string }).code;
+        
+        if (errorCode === "ETIMEDOUT") {
+            return { error: "Connection timeout. Please try again." };
+        } else if (errorCode === "503") {
+            return { error: "Service unavailable. Please try again later." };
         } else {
-            return {
-                error: "An unexpected error occurred. Please try again later.",
-            };
+            return { error: "An unexpected error occurred. Please try again." };
         }
     }
 };
-
-export const oldImageDelete = async (publicId: string) => {
-    try {
-        const result = await cloudinary.v2.uploader.destroy(publicId)
-        return result
-    } catch (error) {
-        console.error("Failed to delete image:", error)
-        throw new Error("Image deletion failed.")
-    }
-}

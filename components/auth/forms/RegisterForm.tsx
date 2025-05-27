@@ -19,9 +19,8 @@ import { Button } from "@/components/ui/button";
 import { register } from "@/actions/register";
 import { RegisterSchema } from "@/lib/schemas";
 import CardWrapper from "../CardWrapper";
-import { FormSuccess } from "../FormSuccess";
-import { FormError } from "../FormError";
 import GoogleButton from "../GoogleButton";
+import { toast } from "sonner";
 
 const getPasswordStrength = (password: string) => {
   let score = 0;
@@ -45,11 +44,8 @@ const getPasswordStrength = (password: string) => {
   return { label, color, score };
 };
 
-
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
@@ -66,12 +62,15 @@ const RegisterForm = () => {
     setLoading(true);
     register(data).then((res) => {
       if (res.error) {
-        setError(res.error);
+        toast.error(res.error, {
+          duration: 5000
+        });
         setLoading(false);
       }
       if (res.success) {
-        setError("");
-        setSuccess(res.success);
+        toast.success(res.success, {
+          duration: 3000
+        });
         setLoading(false);
       }
     });
@@ -172,8 +171,6 @@ const RegisterForm = () => {
               )}
             />
           </div>
-          <FormSuccess message={success} />
-          <FormError message={error} />
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </Button>
