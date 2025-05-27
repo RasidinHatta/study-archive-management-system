@@ -2,6 +2,9 @@
 
 import db from "@/prisma/prisma"
 import { revalidatePath } from "next/cache"
+import cloudinary from 'cloudinary'
+
+const cloudinaryAppName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 
 
 export const getDocumentById = async (id: string) => {
@@ -106,15 +109,51 @@ export const editDocumentById = async (
 }
 
 export const deleteDocumentById = async (id: string) => {
- try {
+  try {
+    // First get the document to obtain the publicId before deleting
+    const document = await db.document.findUnique({
+      where: { id },
+      select: { publicId: true }
+    });
+
+    if (!document) {
+      return { success: false, error: "Document not found" };
+    }
+
+    // Delete from database
     await db.document.delete({
       where: { id }
-    })
-    // Revalidate the path if needed
-    revalidatePath("/admin/documents")
-    return { success: true }
+    });
+
+    // If publicId exists, delete from Cloudinary
+    if (document.publicId) {
+      try {
+        await deleteDocumentFromCloudinary(document.publicId);
+      } catch (cloudinaryError) {
+        console.error("Cloudinary deletion failed:", cloudinaryError);
+        // You might want to handle this differently - maybe just log the error
+        // but still consider the database deletion successful
+      }
+    }
+
+    // Revalidate the path
+    revalidatePath("/admin/documents");
+    return { success: true };
   } catch (error) {
-    console.error("Delete failed:", error)
-    return { success: false, error: "Failed to delete document" }
+    console.error("Delete failed:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to delete document" 
+    };
+  }
+}
+
+export const deleteDocumentFromCloudinary = async (publicId: string) => {
+  try {
+    const result = await cloudinary.v2.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error("Failed to delete Document from Cloudinary:", error);
+    throw new Error("Cloudinary document deletion failed.");
   }
 }

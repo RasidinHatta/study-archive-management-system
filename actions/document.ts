@@ -5,6 +5,7 @@ import { DocumentSchema } from "@/lib/schemas"
 import db from "@/prisma/prisma"
 import * as z from "zod"
 import cloudinary from 'cloudinary'
+import { revalidatePath } from "next/cache"
 
 const cloudinaryAppName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 
@@ -57,6 +58,61 @@ export const uploadDocCloudinary = async (
   }
 };
 
+export const editDocumentById = async (
+    documentId: string,
+    data: {
+        title?: string
+        description?: string | null
+    }
+): Promise<{
+    success: boolean
+    error?: string
+    document?: Document
+}> => {
+    try {
+        // Input validation
+        if (data.title && data.title.trim().length < 2) {
+            return { success: false, error: "Title must be at least 2 characters" }
+        }
+
+        if (data.title && data.title.length > 100) {
+            return { success: false, error: "Title cannot exceed 100 characters" }
+        }
+
+        if (data.description && data.description.length > 500) {
+            return { success: false, error: "Description cannot exceed 500 characters" }
+        }
+
+        await db.document.update({
+            where: { id: documentId },
+            data: {
+                ...data,
+                updatedAt: new Date(),
+            },
+        })
+
+        revalidatePath("/my-document")
+
+        return {
+            success: true,
+        }
+    } catch (error) {
+        console.error("Document update failed:", error)
+
+        if (error instanceof Error) {
+            return {
+                success: false,
+                error: error.message || "Failed to update document"
+            }
+        }
+
+        return {
+            success: false,
+            error: "An unknown error occurred"
+        }
+    }
+}
+
 export const deleteDocumentFromCloudinary = async (publicId: string) => {
     try {
         const result = await cloudinary.v2.uploader.destroy(publicId)
@@ -65,4 +121,44 @@ export const deleteDocumentFromCloudinary = async (publicId: string) => {
         console.error("Failed to delete Document:", error)
         throw new Error("Document deletion failed.")
     }
+}
+
+export const deleteDocumentById = async (id: string) => {
+  try {
+    // First get the document to obtain the publicId before deleting
+    const document = await db.document.findUnique({
+      where: { id },
+      select: { publicId: true }
+    });
+
+    if (!document) {
+      return { success: false, error: "Document not found" };
+    }
+
+    // Delete from database
+    await db.document.delete({
+      where: { id }
+    });
+
+    // If publicId exists, delete from Cloudinary
+    if (document.publicId) {
+      try {
+        await deleteDocumentFromCloudinary(document.publicId);
+      } catch (cloudinaryError) {
+        console.error("Cloudinary deletion failed:", cloudinaryError);
+        // You might want to handle this differently - maybe just log the error
+        // but still consider the database deletion successful
+      }
+    }
+
+    // Revalidate the path
+    revalidatePath("/my-documents");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete failed:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to delete document" 
+    };
+  }
 }

@@ -19,9 +19,13 @@ interface Document {
 
 interface CommunityPageProps {
   documents: Document[];
+  showActions?: boolean,
 }
 
-const CommunityPage = ({ documents = [] }: CommunityPageProps) => {
+const CommunityPage = ({
+  documents = [],
+  showActions = false
+}: CommunityPageProps) => {
   return (
     <AnimatedContainer className="container mx-auto py-8 space-y-8">
       <div className="flex justify-between items-center mb-8">
@@ -48,6 +52,7 @@ const CommunityPage = ({ documents = [] }: CommunityPageProps) => {
               publicId={doc.publicId}
               author={doc.user.name || "Anonymous"}
               authorImage={doc.user.image}
+              showActions={showActions}
             />
           ))}
         </div>

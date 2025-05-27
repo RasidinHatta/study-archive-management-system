@@ -49,7 +49,7 @@ const Navbar = async () => {
                                     Community
                                 </Link>
                                 <Link
-                                    href="/documents"
+                                    href="/my-documents"
                                     className="text-lg transition-transform transform hover:scale-105 hover:text-primary"
                                 >
                                     MyDocument
@@ -114,7 +114,7 @@ const Navbar = async () => {
                             Community
                         </Link>
                         <Link
-                            href="/documents"
+                            href="/my-documents"
                             className="text-lg transition-transform transform hover:scale-105 hover:text-primary hidden md:inline"
                         >
                             MyDocument
