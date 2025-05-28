@@ -19,6 +19,7 @@ type CommentFormProps = {
   };
   documentId: string;
   parentId?: string;
+  mainId?: string;
   onSuccess?: () => void;
 };
 
@@ -26,6 +27,7 @@ const CommentForm = ({
   user,
   documentId,
   parentId,
+  mainId,
   onSuccess,
 }: CommentFormProps) => {
   const [loading, setLoading] = useState(false);
@@ -37,12 +39,18 @@ const CommentForm = ({
       content: "",
       documentId,
       parentId,
+      mainId: parentId ? mainId : undefined, // Only pass mainId if it's a reply
     },
   });
 
   const onSubmit = async (data: z.infer<typeof CommentSchema>) => {
     setLoading(true);
-    const res = await createComment({ ...data, documentId, parentId });
+    const res = await createComment({ 
+      ...data, 
+      documentId, 
+      parentId,
+      mainId: parentId ? mainId : undefined // Only pass mainId for replies
+    });
 
     if (res.success) {
       toast.success(res.success);

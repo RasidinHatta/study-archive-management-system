@@ -29,14 +29,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         {nestedComments.length === 0 ? (
           <CommentsEmpty />
         ) : (
-          nestedComments.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              documentId={documentId}
-              user={user}
-            />
-          ))
+          <div className="space-y-4"> {/* Added container for consistent spacing */}
+            {nestedComments.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                documentId={documentId}
+                user={user}
+                isReply={false} // Root comments have no spacing
+              />
+            ))}
+          </div>
         )}
       </div>
       <div className="border-t px-4 py-3">

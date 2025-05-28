@@ -6,9 +6,13 @@ export interface User {
 export interface CommentType {
   id: string;
   content: string;
-  user?: User | null;
-  replies?: CommentType[];
-  createdAt: Date;
+  userId: string;
+  documentId: string;
   parentId?: string | null;
-  parent?: CommentType;
+  mainId?: string | null; // Make sure this is string | null or string | undefined
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  user?: User;
+  parent?: CommentType | null;
+  replies?: CommentType[];
 }

@@ -71,10 +71,11 @@ export const UserImageSchema = z.object({
 })
 
 export const CommentSchema = z.object({
-    content: z.string().min(1, "Comment cannot be empty"),
-    documentId: z.string(),
-    parentId: z.string().optional(), // for nested replies, optional for now
-})
+  content: z.string().min(1, "Comment cannot be empty"),
+  documentId: z.string(),
+  parentId: z.string().optional(),
+  mainId: z.string().optional(), // Add mainId to the schema
+});
 
 export const ProfileSchema = z.object({
   name: z.string().min(1, "Name is required"),
