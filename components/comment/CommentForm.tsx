@@ -13,73 +13,79 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useRouter } from "next/navigation";
 
 type CommentFormProps = {
-    user: {
-        name?: string | null;
-        image?: string | null;
-    };
-    documentId: string;
-    parentId?: string;
-    onSuccess?: () => void;
+  user: {
+    name?: string | null;
+    image?: string | null;
+  };
+  documentId: string;
+  parentId?: string;
+  onSuccess?: () => void;
 };
 
-const CommentForm = ({ user, documentId, parentId, onSuccess }: CommentFormProps) => {
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+const CommentForm = ({
+  user,
+  documentId,
+  parentId,
+  onSuccess,
+}: CommentFormProps) => {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-    const form = useForm<z.infer<typeof CommentSchema>>({
-        resolver: zodResolver(CommentSchema),
-        defaultValues: {
-            content: "",
-            documentId,
-            parentId,
-        },
-    });
+  const form = useForm<z.infer<typeof CommentSchema>>({
+    resolver: zodResolver(CommentSchema),
+    defaultValues: {
+      content: "",
+      documentId,
+      parentId,
+    },
+  });
 
-    const onSubmit = async (data: z.infer<typeof CommentSchema>) => {
-        setLoading(true);
-        const res = await createComment({ ...data, documentId, parentId });
-        if (res.success) {
-            toast.success(res.success);
-            form.reset();
-            onSuccess?.();
-            router.refresh(); // ✅ refresh the current route
-        } else if (res.error) {
-            toast.error(res.error);
-        }
+  const onSubmit = async (data: z.infer<typeof CommentSchema>) => {
+    setLoading(true);
+    const res = await createComment({ ...data, documentId, parentId });
 
-        setLoading(false);
-    };
+    if (res.success) {
+      toast.success(res.success);
+      form.reset();
+      onSuccess?.();
+      router.refresh();
+    } else if (res.error) {
+      toast.error(res.error);
+    }
 
-    return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex space-x-3">
-                <Avatar>
-                    <AvatarImage src={user?.image || ""} />
-                    <AvatarFallback>
-                        {user?.name?.[0]?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-2">
-                    <Textarea
-                        placeholder="Add to the discussion..."
-                        {...form.register("content")}
-                        className="min-h-[100px]"
-                        disabled={loading}
-                    />
-                    {form.formState.errors.content && (
-                        <p className="text-destructive text-sm">
-                            {form.formState.errors.content.message}
-                        </p>
-                    )}
-                    <div className="flex justify-end">
-                        <Button type="submit" disabled={loading}>
-                            {loading ? "Posting..." : "Post Comment"}
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    );
+    setLoading(false);
+  };
+
+  return (
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="flex items-end gap-3"
+    >
+      <Avatar className="w-8 h-8">
+        <AvatarImage src={user?.image || ""} />
+        <AvatarFallback>
+          {user?.name?.[0]?.toUpperCase() || "U"}
+        </AvatarFallback>
+      </Avatar>
+
+      <Textarea
+        {...form.register("content")}
+        placeholder="Add a comment..."
+        rows={1}
+        className="flex-1 resize-none text-sm px-3 py-2 h-10 max-h-20 rounded-full"
+        disabled={loading}
+      />
+
+      <Button
+        type="submit"
+        size="sm"
+        disabled={loading || !form.watch("content").trim()}
+        className="rounded-full px-4"
+      >
+        {loading ? "..." : "Send"}
+      </Button>
+    </form>
+  );
 };
 
 export default CommentForm;

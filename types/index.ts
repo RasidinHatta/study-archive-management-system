@@ -10,4 +10,5 @@ export interface CommentType {
   replies?: CommentType[];
   createdAt: Date;
   parentId?: string | null;
+  parent?: CommentType;
 }

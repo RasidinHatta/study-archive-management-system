@@ -10,7 +10,7 @@ import { CommentType, User } from "@/types";
 interface CommentSectionProps {
   documentId: string;
   user: User | null;
-  comments: CommentType[]; // flat array
+  comments: CommentType[];
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
@@ -21,26 +21,30 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const nestedComments = buildCommentTree(comments);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Discussion</h2>
-      <CommentForm
-        user={user || { name: "Anonymous", image: null }}
-        documentId={documentId}
-      />
-      {nestedComments.length === 0 ? (
-        <CommentsEmpty />
-      ) : (
-        <div className="space-y-6">
-          {nestedComments.map((comment) => (
+    <div className="w-full mx-auto mt-10 bg-white dark:bg-zinc-900 rounded-xl shadow-md flex flex-col">
+      <div className="px-4 py-3 border-b text-center font-semibold text-lg">
+        Comments
+      </div>
+      <div className="max-h-[60vh] overflow-y-auto px-4 py-4 space-y-4">
+        {nestedComments.length === 0 ? (
+          <CommentsEmpty />
+        ) : (
+          nestedComments.map((comment) => (
             <Comment
               key={comment.id}
               comment={comment}
               documentId={documentId}
-              user={comment.user}
+              user={user}
             />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
+      <div className="border-t px-4 py-3">
+        <CommentForm
+          user={user || { name: "Anonymous", image: null }}
+          documentId={documentId}
+        />
+      </div>
     </div>
   );
 };
