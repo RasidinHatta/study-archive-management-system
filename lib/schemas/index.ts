@@ -60,6 +60,7 @@ export const DocumentSchema = z.object({
     publicId: z.string().optional(),
     format: z.string().optional(),
     resourceType: z.string().optional(),
+    subject: z.enum(["SECRH", "SECVH", "SECBH", "SECPH", "SECJH"]),
 });
 
 
@@ -71,26 +72,26 @@ export const UserImageSchema = z.object({
 })
 
 export const CommentSchema = z.object({
-  content: z.string().min(1, "Comment cannot be empty"),
-  documentId: z.string(),
-  parentId: z.string().optional(),
-  mainId: z.string().optional(), // Add mainId to the schema
+    content: z.string().min(1, "Comment cannot be empty"),
+    documentId: z.string(),
+    parentId: z.string().optional(),
+    mainId: z.string().optional(), // Add mainId to the schema
 });
 
 export const ProfileSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  twoFactorEnabled: z.boolean(),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(),
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email address"),
+    twoFactorEnabled: z.boolean(),
+    currentPassword: z.string().optional(),
+    newPassword: z.string().optional(),
+    confirmPassword: z.string().optional(),
 }).refine(data => {
-  // Only validate passwords if any password field is filled
-  if (data.newPassword || data.currentPassword || data.confirmPassword) {
-    return data.newPassword === data.confirmPassword;
-  }
-  return true;
+    // Only validate passwords if any password field is filled
+    if (data.newPassword || data.currentPassword || data.confirmPassword) {
+        return data.newPassword === data.confirmPassword;
+    }
+    return true;
 }, {
-  message: "New passwords don't match",
-  path: ["confirmPassword"],
+    message: "New passwords don't match",
+    path: ["confirmPassword"],
 });

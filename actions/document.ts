@@ -30,7 +30,7 @@ export const uploadDocCloudinary = async (
       upload_preset: "sams-doc",
     });
 
-    const { title, description } = data;
+    const { title, description, subject } = data;
     const { public_id, format, resource_type } = uploadResponse;
     const url = `https://res.cloudinary.com/${cloudinaryAppName}/image/upload/${public_id}.${format}`;
 
@@ -38,6 +38,7 @@ export const uploadDocCloudinary = async (
       data: {
         title,
         description,
+        subject,
         url,
         publicId: public_id,
         format,

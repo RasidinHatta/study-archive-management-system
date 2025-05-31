@@ -125,10 +125,11 @@ model Document {
   id           String    @id @default(cuid())
   title        String
   description  String?
-  url          String // Cloudinary secure URL
-  publicId     String // Cloudinary public_id (for deletion and management)
-  format       String? // Optional: pdf, jpg, png, etc.
-  resourceType String? // image, raw, video, etc.
+  subject      String?   // Simple string field for subject/category
+  url          String
+  publicId     String
+  format       String?
+  resourceType String?
   userId       String
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   Comment      Comment[]

@@ -14,16 +14,18 @@ import {
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DocumentSchema } from "@/lib/schemas";
-import { useState, useRef } from "react"; // ✅ Import useRef
+import { useState, useRef } from "react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { uploadDocCloudinary } from "@/actions/document";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"; // Import Select components
+
 
 const UploadForm = () => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); // ✅ Create ref
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof DocumentSchema>>({
     resolver: zodResolver(DocumentSchema),
@@ -33,6 +35,7 @@ const UploadForm = () => {
       publicId: "",
       format: "",
       resourceType: "",
+      subject: "SECRH", // Default value
     },
   });
 
@@ -53,7 +56,7 @@ const UploadForm = () => {
       form.reset();
       setFile(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""; // ✅ Clear actual input
+        fileInputRef.current.value = "";
       }
     }
 
@@ -85,6 +88,32 @@ const UploadForm = () => {
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a subject" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="SECRH">SECRH</SelectItem>
+                      <SelectItem value="SECVH">SECVH</SelectItem>
+                      <SelectItem value="SECBH">SECBH</SelectItem>
+                      <SelectItem value="SECPH">SECPH</SelectItem>
+                      <SelectItem value="SECJH">SECJH</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="description"
@@ -105,7 +134,7 @@ const UploadForm = () => {
                 <Input
                   type="file"
                   accept=".pdf,.doc,.docx"
-                  ref={fileInputRef} // ✅ Attach ref
+                  ref={fileInputRef}
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       setFile(e.target.files[0]);

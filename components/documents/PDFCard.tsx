@@ -6,13 +6,13 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipWrapper } from "../wrappers/TooltipWrapper";
 import { CldImage } from "next-cloudinary";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
@@ -30,11 +30,13 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useTransition } from "react";
 import { deleteDocumentById, editDocumentById } from "@/actions/document";
+import { Badge } from "../ui/badge";
 
 interface PDFCardProps {
   id: string;
   title: string;
   description?: string | null;
+  subject: string;
   publicId?: string;
   author: string;
   authorImage?: string | null;
@@ -45,6 +47,7 @@ const PDFCard = ({
   id,
   title,
   description,
+  subject,
   publicId,
   author,
   authorImage,
@@ -71,9 +74,9 @@ const PDFCard = ({
   const handleEdit = (e: React.FormEvent) => {
     e.preventDefault();
     startTransition(async () => {
-      const res = await editDocumentById(id, { 
-        title: editedTitle, 
-        description: editedDescription 
+      const res = await editDocumentById(id, {
+        title: editedTitle,
+        description: editedDescription
       });
       if (res.success) {
         toast.success("Document updated successfully");
@@ -92,7 +95,8 @@ const PDFCard = ({
           <CardDescription className="line-clamp-2">
             {description || "No description provided."}
           </CardDescription>
-          
+          <Badge>{subject}</Badge>
+
           {showActions && (
             <div className="absolute top-4 right-4">
               <DropdownMenu>
