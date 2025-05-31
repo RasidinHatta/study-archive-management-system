@@ -140,12 +140,14 @@ export function RolesTable({ roles: initialRoles }: RolesTableProps) {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            {editOpenRoleId === role.id && (
-                                <RoleEditDialog
-                                    role={role}
-                                    onRoleUpdated={handleRoleUpdated}
-                                />
-                            )}
+                            <RoleEditDialog
+                                role={role}
+                                open={editOpenRoleId === role.id}
+                                onOpenChange={(open) => {
+                                    if (!open) setEditOpenRoleId(null)
+                                }}
+                                onRoleUpdated={handleRoleUpdated}
+                            />
 
                             <RoleUserDialog
                                 open={userDialogRoleId === role.id}

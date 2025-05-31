@@ -20,10 +20,12 @@ import { editRoleById } from "@/actions/admin/role"
 
 interface RoleEditDialogProps {
     role: Role
+    open: boolean
+    onOpenChange: (open: boolean) => void
     onRoleUpdated?: (updatedRole: Role) => void
 }
 
-export function RoleEditDialog({ role, onRoleUpdated }: RoleEditDialogProps) {
+export function RoleEditDialog({ role, open, onOpenChange, onRoleUpdated }: RoleEditDialogProps) {
     const [isPending, startTransition] = useTransition()
 
     const [name, setName] = useState(role.name)
@@ -68,7 +70,7 @@ export function RoleEditDialog({ role, onRoleUpdated }: RoleEditDialogProps) {
     }
 
     return (
-        <Dialog open>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                     <DialogTitle>Edit Role</DialogTitle>
@@ -151,7 +153,7 @@ export function RoleEditDialog({ role, onRoleUpdated }: RoleEditDialogProps) {
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button type="button" variant="outline">
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                                 Cancel
                             </Button>
                         </DialogClose>
