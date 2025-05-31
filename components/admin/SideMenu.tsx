@@ -1,8 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
-import { AiOutlineHeart } from 'react-icons/ai'
-import { BiHome } from 'react-icons/bi'
 import { Button } from '../ui/button'
+import { FiHome, FiFile, FiUsers, FiMessageSquare, FiSettings } from 'react-icons/fi'
+import { FaFileAlt, FaUserCog } from 'react-icons/fa'
+import { IoSettingsSharp } from 'react-icons/io5'
 
 const SideMenu = async () => {
     return (
@@ -19,6 +20,7 @@ const SideMenu = async () => {
                             className="w-full justify-start flex gap-2"
                         >
                             <Link href="/admin">
+                                <FiHome className="h-4 w-4" />
                                 Home
                             </Link>
                         </Button>
@@ -28,6 +30,7 @@ const SideMenu = async () => {
                             className="w-full justify-start flex gap-2"
                         >
                             <Link href="/admin/documents">
+                                <FaFileAlt className="h-4 w-4" />
                                 Documents
                             </Link>
                         </Button>
@@ -37,6 +40,7 @@ const SideMenu = async () => {
                             className="w-full justify-start flex gap-2"
                         >
                             <Link href="/admin/users">
+                                <FiUsers className="h-4 w-4" />
                                 Users
                             </Link>
                         </Button>
@@ -46,6 +50,7 @@ const SideMenu = async () => {
                             className="w-full justify-start flex gap-2"
                         >
                             <Link href="/admin/comments">
+                                <FiMessageSquare className="h-4 w-4" />
                                 Comments
                             </Link>
                         </Button>
@@ -55,6 +60,7 @@ const SideMenu = async () => {
                             className="w-full justify-start flex gap-2"
                         >
                             <Link href="/admin/setting">
+                                <IoSettingsSharp className="h-4 w-4" />
                                 Setting
                             </Link>
                         </Button>
