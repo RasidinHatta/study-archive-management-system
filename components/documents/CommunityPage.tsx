@@ -1,10 +1,18 @@
-'use client'; // Ensuring this is a Client Component
+'use client';
 
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import DocumentsEmpty from '../empty-states/DocumentsEmpty';
 import { AnimatedContainer } from '../animations/AnimatedContainer';
 import PDFCard from './PDFCard';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState } from 'react';
 
 interface Document {
   id: string;
@@ -13,7 +21,7 @@ interface Document {
   subject: string;
   publicId: string;
   user: {
-    name: string | null; // Allow name to be string | null
+    name: string | null;
     image: string | null;
   };
 }
@@ -29,26 +37,64 @@ const CommunityPage = ({
   showActions = false,
   showUpload = false
 }: CommunityPageProps) => {
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
+  
+  // Define the specific subjects you want to include
+  const specificSubjects = [
+    'SECRH',
+    'SECVH',
+    'SECBH',
+    'SECPH',
+    'SECJH'
+  ];
+  
+  // Combine specific subjects with unique subjects from documents
+  const allSubjects = ['all', ...specificSubjects];
+  const documentSubjects = [...new Set(documents.map(doc => doc.subject))];
+  const subjects = [...new Set([...allSubjects, ...documentSubjects])];
+  
+  // Filter documents based on selected subject
+  const filteredDocuments = selectedSubject === 'all' 
+    ? documents 
+    : documents.filter(doc => doc.subject === selectedSubject);
+
   return (
     <AnimatedContainer className="container mx-auto py-8 space-y-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold">Community Documents</h1>
           <p className="text-muted-foreground">
             Browse and discuss documents shared by the community
           </p>
         </div>
-        {showUpload && (
-          <Button asChild>
-            <Link href="/upload">Upload Document</Link>
-          </Button>
-        )}
+        
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by subject" />
+            </SelectTrigger>
+            <SelectContent>
+              {subjects.map(subject => (
+                <SelectItem key={subject} value={subject}>
+                  {subject === 'all' ? 'All' : subject}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {showUpload && (
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/upload">Upload Document</Link>
+            </Button>
+          )}
+        </div>
       </div>
-      {documents.length === 0 ? (
+      
+      {filteredDocuments.length === 0 ? (
         <DocumentsEmpty />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {documents.map((doc) => (
+          {filteredDocuments.map((doc) => (
             <PDFCard
               id={doc.id}
               key={doc.id}
