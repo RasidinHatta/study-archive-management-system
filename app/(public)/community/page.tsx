@@ -22,7 +22,7 @@ const Page = async ({ searchParams }: CommunityPageProps) => {
 
   const upload = role === RoleName.USER
 
-  const documents = await getCommunityDocuments();
+  const documents = await getCommunityDocuments() as [];
 
   const filteredDocuments = query
     ? documents.filter(
