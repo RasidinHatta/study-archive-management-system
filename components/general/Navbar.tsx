@@ -43,7 +43,7 @@ const Navbar = async () => {
                                     href="/"
                                     className="font-bold text-lg transition-transform transform hover:scale-105 hover:text-primary"
                                 >
-                                    <SheetTitle>SAMS</SheetTitle>
+                                    <SheetTitle>[S][A]</SheetTitle>
                                 </Link>
                                 <Link
                                     href="/community"
@@ -112,7 +112,7 @@ const Navbar = async () => {
                             href="/"
                             className="font-bold text-lg transition-transform transform hover:scale-105 hover:text-primary"
                         >
-                            SAMS
+                            [S][A]
                         </Link>
                         <Link
                             href="/community"

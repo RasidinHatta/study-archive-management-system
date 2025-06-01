@@ -19,7 +19,7 @@ export default function Home() {
     <>
       {/* Hero Section */}
       <section className="h-screen flex flex-col justify-center items-center px-4 text-center">
-        <h1 className="text-5xl font-extrabold mb-4">Welcome to SAMS</h1>
+        <h1 className="text-5xl font-extrabold mb-4">Welcome to Study Archive</h1>
         <p className="text-xl mb-6 max-w-2xl">
           Upload, read, and share documents seamlessly — your digital library, always accessible.
         </p>
