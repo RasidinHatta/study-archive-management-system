@@ -10,17 +10,20 @@ export const metadata: Metadata = {
   description: "A document sharing platform with community discussions",
 }
 
-interface SearchParams {
-  q?: string;
-}
+// Remove the SearchParams interface - let Next.js handle the typing
 
-const Page = async ({ searchParams }: { searchParams: SearchParams }) => {
-  const query = searchParams.q?.toLowerCase() || '';
+const Page = async ({ 
+  searchParams 
+}: { 
+  searchParams: Record<string, string | string[] | undefined> 
+}) => {
+  const query = typeof searchParams.q === 'string' 
+    ? searchParams.q.toLowerCase() 
+    : '';
+  
   const session = await auth()
   const role = session?.user?.role.name
-
   const upload = role === RoleName.USER
-
   const documents = await getCommunityDocuments()
 
   const filteredDocuments = query
