@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const Page = async () => {
     const session = await auth()
     const userId= session?.user?.id as string
-    const documents = await getMyDocuments(userId);
+    const documents = await getMyDocuments(userId) as [];
     const action = session ? true : false
     const upload = session ? true : false
 
