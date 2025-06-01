@@ -47,7 +47,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="py-20 px-6 text-center">
-        <h2 className="text-4xl font-bold mb-10">Why Use SAMS?</h2>
+        <h2 className="text-4xl font-bold mb-10">Why Use Study Archive?</h2>
         <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
           {/* Feature 1 */}
           <div className="bg-muted-foreground p-6 shadow-lg rounded-lg text-background">
