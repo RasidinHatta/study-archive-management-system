@@ -7,6 +7,16 @@ import { CommentType, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { deleteComment } from "@/actions/comment";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "../ui/dialog";
 
 interface CommentProps {
   comment: CommentType;
@@ -24,9 +34,11 @@ const Comment: React.FC<CommentProps> = ({
   replyChain = [],
 }) => {
   const [showReply, setShowReply] = useState(false);
-  const [showReplies, setShowReplies] = useState(false); // New state for toggling replies visibility
+  const [showReplies, setShowReplies] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
-  
+
   const toggleReply = useCallback(() => {
     setShowReply((prev) => !prev);
   }, []);
@@ -40,11 +52,30 @@ const Comment: React.FC<CommentProps> = ({
     router.refresh();
   }, [router]);
 
-  const newReplyChain = comment.parentId 
+  const handleDelete = useCallback(async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteComment(comment.id);
+      if (result.success) {
+        router.refresh();
+      } else {
+        alert(result.error || "Failed to delete comment");
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      alert("An error occurred while deleting the comment");
+    } finally {
+      setIsDeleting(false);
+      setIsDialogOpen(false);
+    }
+  }, [comment.id, router]);
+
+  const newReplyChain = comment.parentId
     ? [...replyChain, comment.user?.name || "Anonymous"]
     : [];
 
   const hasReplies = Array.isArray(comment.replies) && comment.replies.length > 0;
+  const isOwner = user?.id === comment.user?.id;
 
   return (
     <div className={`flex gap-3 ${isReply ? "ml-6 mt-3" : ""}`}>
@@ -59,6 +90,7 @@ const Comment: React.FC<CommentProps> = ({
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">
               {comment.user?.name || "Anonymous"}
+              {isOwner && " (you)"}
               {isReply && replyChain.length > 0 && (
                 <span className="text-xs text-muted-foreground ml-2">
                   → {replyChain.join(" → ")}
@@ -83,6 +115,43 @@ const Comment: React.FC<CommentProps> = ({
           >
             {showReply ? "Cancel" : "Reply"}
           </Button>
+          {isOwner && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-destructive h-6 px-2 hover:text-destructive"
+                >
+                  Delete
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Comment</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this comment? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
           {hasReplies && (
             <Button
               variant="ghost"
