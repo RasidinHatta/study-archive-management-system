@@ -1,3 +1,5 @@
+"use client"
+
 import {
     Card,
     CardHeader,
@@ -30,6 +32,41 @@ const DocumentCard = ({
     author,
     authorImage,
 }: DocumentCardProps) => {
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `${title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+
+            // These additional steps help trigger the dialog in more browsers
+            link.style.display = 'none';
+            link.target = '_blank';
+            document.body.appendChild(link);
+
+            // Simulate click with custom event (helps in some browsers)
+            const clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            });
+            link.dispatchEvent(clickEvent);
+
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(blobUrl);
+            }, 100);
+
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.open(url, '_blank');
+        }
+    };
+
     return (
         <Card className="hover:shadow-lg transition-shadow flex flex-col">
             <CardHeader>
@@ -47,23 +84,19 @@ const DocumentCard = ({
                 <div className="flex items-center space-x-2">
                     <Avatar className="h-6 w-6">
                         <AvatarImage src={authorImage || undefined} />
-                        <AvatarFallback>
-                            {author.charAt(0).toUpperCase()}
-                        </AvatarFallback>
+                        <AvatarFallback>{author.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm">{author}</span>
                 </div>
 
                 <Button
-                    asChild
                     size="sm"
                     variant="outline"
                     className="gap-1"
+                    onClick={handleDownload}
                 >
-                    <a href={url} download>
-                        <Download className="w-4 h-4" />
-                        Download
-                    </a>
+                    <Download className="w-4 h-4" />
+                    Download
                 </Button>
             </CardFooter>
         </Card>
