@@ -87,7 +87,7 @@ const CommunityPage = ({
           </Select>
           
           {showUpload && (
-            <Button asChild className="w-full sm:w-auto">
+            <Button asChild className="w-full sm:w-auto text-secondary">
               <Link href="/upload">Upload Document</Link>
             </Button>
           )}

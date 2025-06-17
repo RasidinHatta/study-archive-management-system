@@ -47,12 +47,11 @@ export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
   }
 };
 
-// Get all comments for a specific document
 export const getCommentsByDocumentId = async (documentId: string) => {
   try {
     const comments = await db.comment.findMany({
       where: { documentId },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       include: {
         user: {
           select: {
@@ -62,6 +61,7 @@ export const getCommentsByDocumentId = async (documentId: string) => {
           },
         },
         replies: {
+          orderBy: { createdAt: "desc" }, // Add this to sort replies
           include: {
             user: {
               select: {

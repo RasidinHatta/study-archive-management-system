@@ -201,6 +201,65 @@ const Comment: React.FC<CommentProps> = ({
                     </em>
                   );
                 },
+                table({ node, children, ...props }) {
+                  return (
+                    <div className="overflow-x-auto my-2">
+                      <table
+                        className="w-full border-collapse border border-muted-foreground/20"
+                        {...props}  // Spread props here
+                      >
+                        {children}
+                      </table>
+                    </div>
+                  );
+                },
+                thead({ node, children, ...props }) {
+                  return (
+                    <thead
+                      className="bg-muted/50"
+                      {...props}  // Spread props here
+                    >
+                      {children}
+                    </thead>
+                  );
+                },
+                tbody({ node, children, ...props }) {
+                  return (
+                    <tbody {...props}>
+                      {children}
+                    </tbody>
+                  );
+                },
+                tr({ node, children, ...props }) {
+                  return (
+                    <tr
+                      className="border-b border-muted-foreground/20"
+                      {...props}  // Spread props here
+                    >
+                      {children}
+                    </tr>
+                  );
+                },
+                th({ node, children, ...props }) {
+                  return (
+                    <th
+                      className="p-2 text-left font-semibold border-r border-muted-foreground/20 last:border-r-0"
+                      {...props}
+                    >
+                      {children}
+                    </th>
+                  );
+                },
+                td({ node, children, ...props }) {
+                  return (
+                    <td
+                      className="p-2 border-r border-muted-foreground/20 last:border-r-0"
+                      {...props}
+                    >
+                      {children}
+                    </td>
+                  );
+                },
               }}
             >
               {comment.content}

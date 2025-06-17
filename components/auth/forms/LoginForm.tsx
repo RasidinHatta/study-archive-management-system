@@ -125,7 +125,7 @@ const LoginForm = () => {
                             </>
                         )}
                     </div>
-                    <Button type="submit" className="w-full" disabled={isPending}>
+                    <Button type="submit" className="w-full text-secondary" disabled={isPending}>
                         {showTwoFactor
                             ? (isPending ? "Confirm..." : "Confirm")
                             : (isPending ? "Loading..." : "Login")

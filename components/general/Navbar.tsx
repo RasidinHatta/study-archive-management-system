@@ -95,7 +95,7 @@ const Navbar = async () => {
                                             <Button asChild variant="outline">
                                                 <Link href="/login">Login</Link>
                                             </Button>
-                                            <Button asChild variant="default">
+                                            <Button asChild variant="default" className='text-secondary'>
                                                 <Link href="/register">Register</Link>
                                             </Button>
                                         </>
@@ -139,7 +139,7 @@ const Navbar = async () => {
                 {/* Right: Desktop Navigation */}
                 <nav className="hidden md:flex items-center space-x-4">
                     {role === RoleName.USER && (
-                        <Button asChild>
+                        <Button asChild className='text-secondary'>
                             <Link href="/upload">Upload</Link>
                         </Button>
                     )}
@@ -166,7 +166,7 @@ const Navbar = async () => {
                             <Button asChild variant="outline">
                                 <Link href="/login">Login</Link>
                             </Button>
-                            <Button asChild variant="default">
+                            <Button asChild variant="default" className='text-secondary'>
                                 <Link href="/register">Register</Link>
                             </Button>
                         </>
