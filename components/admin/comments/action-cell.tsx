@@ -1,6 +1,6 @@
 "use client"
 
-import { getCommentById, getDocumentByCommentId, getRepliesByCommentId, getUserById } from "@/actions/admin/comment"
+import { deleteCommentById, editCommentById, getCommentById, getDocumentByCommentId, getRepliesByCommentId, getUserById } from "@/actions/admin/comment"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -29,6 +29,7 @@ import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
 import { PrismAsync as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import { deleteComment } from "@/actions/comment"
 
 interface CommentActionCellProps {
   commentId: string
@@ -123,6 +124,30 @@ export function CommentActionCell({
     })
   }
 
+  const onConfirmDelete = () => {
+    startTransition(async () => {
+      const res = await deleteCommentById(commentId)
+      if (res.success) {
+        toast.success("Comment deleted successfully")
+        setDeleteOpen(false)
+      } else {
+        toast.error(res.error || "Failed to delete Comment")
+      }
+    })
+  }
+
+  const onConfirmEdit = (e: React.FormEvent) => {
+    e.preventDefault()
+    startTransition(async () => {
+      const res = await editCommentById(commentId, { content: editedContent }) // ✅ use updated value
+      if (res.success) {
+        toast.success("Comment updated successfully")
+        setEditOpen(false)
+      } else {
+        toast.error(res.error || "Failed to update Comment")
+      }
+    })
+  }
 
   const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString)
@@ -506,6 +531,7 @@ export function CommentActionCell({
             <Button
               variant="destructive"
               disabled={isPending}
+              onClick={onConfirmDelete}
             >
               {isPending ? "Deleting..." : "Delete"}
             </Button>
@@ -522,7 +548,7 @@ export function CommentActionCell({
               Update the comment content below.
             </DialogDescription>
           </DialogHeader>
-          <form className="space-y-4">
+          <form onSubmit={onConfirmEdit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="content">Comment</Label>
               <Input

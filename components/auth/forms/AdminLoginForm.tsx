@@ -92,7 +92,7 @@ const AdminLoginForm = () => {
                         />
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? "Loading..." : "Login"}
+                        {loading ? "Logging In..." : "Login"}
                     </Button>
                 </form>
             </Form>

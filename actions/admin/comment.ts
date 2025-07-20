@@ -1,6 +1,9 @@
 "use server"
 
+import { auth } from "@/auth"
 import db from "@/prisma/prisma"
+import { revalidatePath } from "next/cache"
+
 
 export const getCommentById = async (commentId: string) => {
     try {
@@ -148,4 +151,74 @@ export const getRepliesByCommentId = async (commentId: string) => {
         console.error("Error fetching replies:", error)
         return { success: false, error: "Failed to fetch replies" }
     }
+}
+
+export const deleteCommentById = async (id: string) => {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return { success: false, error: "Unauthorized" }
+    }
+
+    const comment = await db.comment.findUnique({
+      where: { id },
+    })
+
+    if (!comment) {
+      return { success: false, error: "Comment not found" }
+    }
+
+    await db.comment.delete({
+      where: { id },
+    })
+
+    revalidatePath("/admin/comments")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Delete failed:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete comment",
+    }
+  }
+}
+
+export const editCommentById = async (
+  commentId: string,
+  data: {
+    content?: string
+  }
+): Promise<{
+  success: boolean
+  error?: string
+  comment?: Comment
+}> => {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return { success: false, error: "Unauthorized" }
+    }
+
+    await db.comment.update({
+      where: { id: commentId },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    })
+
+    revalidatePath("/admin/comments")
+
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("Comment update failed:", error)
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update comment",
+    }
+  }
 }
