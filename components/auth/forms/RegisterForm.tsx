@@ -10,9 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,14 +20,21 @@ import CardWrapper from "../CardWrapper";
 import GoogleButton from "../GoogleButton";
 import { toast } from "sonner";
 
+/**
+ * Calculates password strength based on complexity criteria
+ * @param password - The password to evaluate
+ * @returns Object containing strength label, color, and score (0-100)
+ */
 const getPasswordStrength = (password: string) => {
   let score = 0;
+  // Score calculation based on password requirements
   if (password.length >= 8) score += 20;
-  if (/[a-z]/.test(password)) score += 20;
-  if (/[A-Z]/.test(password)) score += 20;
-  if (/\d/.test(password)) score += 20;
-  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 20;
+  if (/[a-z]/.test(password)) score += 20; // Lowercase check
+  if (/[A-Z]/.test(password)) score += 20; // Uppercase check
+  if (/\d/.test(password)) score += 20; // Number check
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 20; // Special char check
 
+  // Determine strength label and color based on score
   let label = "Weak";
   let color = "bg-red-500";
 
@@ -44,10 +49,18 @@ const getPasswordStrength = (password: string) => {
   return { label, color, score };
 };
 
+/**
+ * Registration form component with:
+ * - Email, name, password, and password confirmation fields
+ * - Real-time password strength indicator
+ * - Visual feedback for password requirements
+ * - Integration with registration API
+ */
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
 
+  // Initialize form with Zod validation
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -58,6 +71,10 @@ const RegisterForm = () => {
     },
   });
 
+  /**
+   * Handles form submission
+   * @param data - Form data validated against RegisterSchema
+   */
   const onSubmit = async (data: z.infer<typeof RegisterSchema>) => {
     setLoading(true);
     register(data).then((res) => {
@@ -87,6 +104,7 @@ const RegisterForm = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
+            {/* Email Field */}
             <FormField
               control={form.control}
               name="email"
@@ -104,6 +122,8 @@ const RegisterForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Name Field */}
             <FormField
               control={form.control}
               name="name"
@@ -117,11 +137,16 @@ const RegisterForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Password Field with Strength Indicator */}
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => {
+                // Calculate password strength metrics
                 const { label, color, score } = getPasswordStrength(passwordInput);
+                
+                // Password requirement checklist
                 const requirements = [
                   { regex: /^.{8,}$/, label: "8+ characters" },
                   { regex: /[a-z]/, label: "Lowercase letter" },
@@ -145,9 +170,11 @@ const RegisterForm = () => {
                       />
                     </FormControl>
 
+                    {/* Password Strength Visual Feedback */}
                     <div className="mt-2 space-y-2">
                       {passwordInput && (
                         <>
+                          {/* Strength Meter Bar */}
                           <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full transition-all duration-300 ${score < 40 ? 'bg-destructive' :
@@ -156,6 +183,7 @@ const RegisterForm = () => {
                               style={{ width: `${score}%` }}
                             />
                           </div>
+                          {/* Strength Label */}
                           <p className={`text-xs ${score < 40 ? 'text-destructive' :
                               score < 70 ? 'text-warning' : 'text-success'
                             }`}>
@@ -164,6 +192,7 @@ const RegisterForm = () => {
                         </>
                       )}
 
+                      {/* Requirement Checklist */}
                       <div className="grid grid-cols-2 gap-1 text-xs">
                         {requirements.map((req, i) => (
                           <div key={i} className="flex items-center">
@@ -187,6 +216,8 @@ const RegisterForm = () => {
                 );
               }}
             />
+
+            {/* Password Confirmation Field */}
             <FormField
               control={form.control}
               name="passwordConfirmation"
@@ -201,11 +232,15 @@ const RegisterForm = () => {
               )}
             />
           </div>
+
+          {/* Submit Button */}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </Button>
         </form>
       </Form>
+      
+      {/* Google OAuth Button */}
       <GoogleButton />
     </CardWrapper>
   );
