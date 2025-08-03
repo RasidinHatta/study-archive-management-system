@@ -1,12 +1,12 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
-import { 
-  adminLoginRoute, 
-  adminRoute, 
-  authRoute, 
-  protectedRoute, 
-  publicRoute, 
-  userRoute 
+import {
+  adminLoginRoute,
+  adminRoute,
+  authRoute,
+  protectedRoute,
+  publicRoute,
+  userRoute
 } from "./route";
 import { getToken } from "next-auth/jwt";
 import { RoleName } from "./lib/generated/prisma";
@@ -18,7 +18,7 @@ export default auth(async (req) => {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
 
-  const matchesAny = (routes: string[], p: string) => 
+  const matchesAny = (routes: string[], p: string) =>
     routes.some(route => p === route || p.startsWith(route + "/"));
 
   const isPublicRoute = matchesAny(publicRoute, path);
@@ -30,12 +30,12 @@ export default auth(async (req) => {
   // 1. Public routes - check if admin is trying to access
   if (isPublicRoute) {
     try {
-      const token = await getToken({ 
-        req, 
+      const token = await getToken({
+        req,
         secret: process.env.NEXTAUTH_SECRET,
         secureCookie: process.env.NODE_ENV === 'production'
       });
-      
+
       if (token?.roleName === "ADMIN") {
         return Response.redirect(`${basedUrl}/admin`);
       }
@@ -48,24 +48,25 @@ export default auth(async (req) => {
   // 2. Get token safely for other routes
   let token;
   try {
-    token = await getToken({ 
-      req, 
+    token = await getToken({
+      req,
       secret: process.env.NEXTAUTH_SECRET,
       secureCookie: process.env.NODE_ENV === 'production'
     });
   } catch (error) {
     console.error('Token retrieval error:', error);
     if (path.startsWith('/api')) {
-      return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({
         error: 'Authentication error',
         message: 'Could not verify your session'
       }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     return Response.redirect(`${basedUrl}/auth-error`);
   }
-  
+
   const role = token?.roleName as RoleName;
   const isAdmin = role === RoleName.ADMIN;
+  const isPublic = role === RoleName.PUBLICUSER;
   const canUpload = token?.role.createDocument
   const isLoggedIn = !!token;
 
@@ -86,8 +87,8 @@ export default auth(async (req) => {
     return Response.redirect(`${basedUrl}/login`);
   }
 
-  // 6. User routes - restrict PUBLICUSER role
-  if (isLoggedIn && !canUpload) {
+  // 6. User routes - restrict PUBLICUSER role without upload permissions
+  if (isLoggedIn && isUserRoute && isPublic && !canUpload) {
     return Response.redirect(`${basedUrl}/access-denied`);
   }
 });

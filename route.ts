@@ -28,6 +28,5 @@ export const adminLoginRoute = [
 ]
 
 export const userRoute = [
-    "/testUser",
     "/upload"
 ]
