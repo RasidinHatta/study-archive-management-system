@@ -5,9 +5,10 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import DocumentActionCell from "./action-cell"
 import { Document, User } from "@/lib/generated/prisma/client"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 type DocumentWithUser = Document & {
-  user: User
+    user: User
 }
 
 
@@ -28,6 +29,34 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
     {
         accessorKey: "description",
         header: "Description",
+        cell: ({ row }) => {
+            const { description } = row.original
+            const maxLength = 50
+
+            if (!description) {
+                return <span className="text-muted-foreground/50">No description</span>;
+            }
+
+            const truncated = description.length > maxLength
+                ? `${description.substring(0, maxLength)}...`
+                : description
+
+            return (
+                <div className="pl-6 border-l-2 border-muted-foreground/30">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="line-clamp-2 text-sm">
+                                {truncated}
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" align="start" className="max-w-[300px]">
+                            <p className="break-words">{description}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+            )
+        },
+        size: 300,
     },
     {
         accessorKey: "subject",

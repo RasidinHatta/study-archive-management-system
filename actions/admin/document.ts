@@ -78,12 +78,28 @@ export const editDocumentById = async (
             return { success: false, error: "Description cannot exceed 500 characters" }
         }
 
+        // Prepare update data
+        const updateData: {
+            title?: string
+            description?: string | null
+            updatedAt: Date
+        } = {
+            updatedAt: new Date(),
+        }
+
+        // Only include title if provided
+        if (data.title) {
+            updateData.title = data.title
+        }
+
+        // Only include description if it's not an empty string
+        if (data.description !== undefined && data.description !== "") {
+            updateData.description = data.description
+        }
+
         await db.document.update({
             where: { id: documentId },
-            data: {
-                ...data,
-                updatedAt: new Date(),
-            },
+            data: updateData,
         })
 
         revalidatePath("/admin/documents")
