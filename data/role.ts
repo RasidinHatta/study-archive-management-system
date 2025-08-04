@@ -1,5 +1,7 @@
 import db from "@/prisma/prisma"
 
+// Source: /data/role.ts
+
 /**
  * Fetches all roles from the database.
  * @returns Array of roles or null if an error occurs.
