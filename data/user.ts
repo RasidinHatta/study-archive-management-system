@@ -13,6 +13,11 @@ export const getAllUser = async () => {
 export const getAllUserWithRole = async () => {
     try {
         const users = await db.user.findMany({
+            where: {
+                NOT: {
+                    roleName: "ADMIN"
+                }
+            },
             orderBy: {
                 name: "asc", // 👈 default sort
             },

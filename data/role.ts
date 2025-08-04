@@ -13,6 +13,11 @@ export const getAllRoles = async () => {
 export const getAllRolesWithUSer = async () => {
     try {
         const roles = await db.role.findMany({
+            where: {
+                NOT: {
+                    name: "ADMIN"
+                }
+            },
             include: {
                 users: {
                     select: {
