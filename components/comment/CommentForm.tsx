@@ -12,6 +12,14 @@ import { useRouter } from "next/navigation";
 import { createComment } from "@/actions/comment";
 import { Button } from "../ui/button";
 
+/**
+ * Props for the CommentForm component
+ * @property user - Current user information (name and image)
+ * @property documentId - ID of the document being commented on
+ * @property parentId - Optional parent comment ID for replies
+ * @property mainId - Optional main comment ID for nested replies
+ * @property onSuccess - Callback function to execute after successful comment submission
+ */
 type CommentFormProps = {
   user: {
     name?: string | null;
@@ -23,6 +31,21 @@ type CommentFormProps = {
   onSuccess?: () => void;
 };
 
+/**
+ * CommentForm Component
+ * 
+ * A rich text comment form with markdown support that allows:
+ * - Creating new comments
+ * - Replying to existing comments
+ * - Nested comment threads
+ * 
+ * Features:
+ * - Markdown editor with toolbar
+ * - Custom table insertion
+ * - Character count limit
+ * - User avatar display
+ * - Loading states
+ */
 const CommentForm = ({
   user,
   documentId,
@@ -30,21 +53,29 @@ const CommentForm = ({
   mainId,
   onSuccess,
 }: CommentFormProps) => {
+  // State for loading indicator and character count
   const [loading, setLoading] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  
+  // Ref for the editor container
   const editorRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Form initialization with Zod validation
   const form = useForm<z.infer<typeof CommentSchema>>({
     resolver: zodResolver(CommentSchema),
     defaultValues: {
       content: "",
       documentId,
       parentId,
-      mainId: parentId ? mainId : undefined,
+      mainId: parentId ? mainId : undefined, // Only set mainId if this is a reply
     },
   });
 
+  /**
+   * Handles form submission
+   * Creates a new comment or reply and handles the response
+   */
   const onSubmit = async () => {
     setLoading(true);
     try {
@@ -57,20 +88,24 @@ const CommentForm = ({
 
       if (res.success) {
         toast.success(res.success);
-        form.reset();
-        setCharCount(0);
-        onSuccess?.();
-        router.refresh();
+        form.reset(); // Clear the form
+        setCharCount(0); // Reset character count
+        onSuccess?.(); // Execute success callback if provided
+        router.refresh(); // Refresh the page to show new comment
       } else if (res.error) {
         toast.error(res.error);
       }
     } catch (error) {
       toast.error("Failed to post comment");
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
+  /**
+   * Custom table command for the markdown editor
+   * Allows users to insert markdown tables with configurable rows/columns
+   */
   const customTableCommand: ICommand = {
     name: "table",
     keyCommand: "table",
@@ -130,6 +165,7 @@ const CommentForm = ({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-3">
+      {/* User avatar */}
       <Avatar className="w-10 h-10 rounded-full">
         <AvatarImage src={user?.image || ""} />
         <AvatarFallback className="rounded-full">
@@ -137,8 +173,10 @@ const CommentForm = ({
         </AvatarFallback>
       </Avatar>
 
+      {/* Comment input area */}
       <div className="flex-1 flex flex-col gap-2">
         <div className="relative" ref={editorRef}>
+          {/* Markdown editor */}
           <MDEditor
             value={form.watch("content")}
             onChange={(val: string | undefined) => {
@@ -146,10 +184,11 @@ const CommentForm = ({
               setCharCount(val?.length || 0);
             }}
             height={150}
-            preview="live"
+            preview="live" // Live preview mode
             textareaProps={{
               placeholder: "Add a comment...",
             }}
+            // Configured toolbar commands
             commands={[
               commands.bold,
               commands.italic,
@@ -165,12 +204,14 @@ const CommentForm = ({
               commands.checkedListCommand,
               commands.divider,
               commands.quote,
-              customTableCommand, // Use our custom table command instead of commands.table
+              customTableCommand, // Custom table command
               commands.divider,
               commands.title
             ]}
           />
         </div>
+
+        {/* Footer with character count and submit button */}
         <div className="flex justify-between items-center">
           <span className="text-xs text-muted-foreground">
             {charCount}/1000 characters

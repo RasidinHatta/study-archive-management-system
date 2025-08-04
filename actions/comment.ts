@@ -6,32 +6,44 @@ import db from "@/prisma/prisma"
 import { revalidatePath } from "next/cache"
 import * as z from "zod"
 
-// Create a new comment
+/**
+ * Creates a new comment or reply
+ * @param rawData - Comment data including content, documentId, and optional parentId/mainId
+ * @returns Success message or error object
+ */
 export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
+  // Verify user session
   const session = await auth();
   if (!session?.user?.id) {
     return { error: "Unauthorized" };
   }
 
+  // Validate input data using Zod schema
   const parse = CommentSchema.safeParse(rawData);
   if (!parse.success) {
     return { error: "Invalid data", issues: parse.error.flatten() };
   }
 
+  // Extract validated data
   const { content, documentId, parentId, mainId } = parse.data;
 
   try {
-    // If it's a reply (has parentId), we need to determine the mainId
+    /**
+     * Determine mainId for comment threading:
+     * - For replies (has parentId): use provided mainId or parentId as mainId
+     * - For root comments: no mainId
+     */
     const actualMainId = parentId 
-      ? mainId || parentId  // Use provided mainId or parentId as mainId
-      : null;               // No mainId for root comments
+      ? mainId || parentId
+      : null;
 
+    // Create comment in database
     await db.comment.create({
       data: {
         content,
         documentId,
         userId: session.user.id,
-        parentId: parentId ?? null,
+        parentId: parentId ?? null, // Ensure null instead of undefined
         mainId: actualMainId,
       },
     });
@@ -40,19 +52,24 @@ export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
   } catch (error) {
     console.error("Failed to post comment:", error);
     return {
-      error:
-        (error as { message?: string }).message ??
-        "Failed to post comment. Please try again later.",
+      error: (error as { message?: string }).message ??
+             "Failed to post comment. Please try again later.",
     };
   }
 };
 
+/**
+ * Fetches all comments for a document including nested replies
+ * @param documentId - ID of the document to fetch comments for
+ * @returns Array of comments with user data and nested replies
+ */
 export const getCommentsByDocumentId = async (documentId: string) => {
   try {
     const comments = await db.comment.findMany({
       where: { documentId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }, // Newest comments first
       include: {
+        // Include author info
         user: {
           select: {
             id: true,
@@ -60,8 +77,9 @@ export const getCommentsByDocumentId = async (documentId: string) => {
             image: true,
           },
         },
+        // Include replies with their authors
         replies: {
-          orderBy: { createdAt: "desc" }, // Add this to sort replies
+          orderBy: { createdAt: "desc" }, // Newest replies first
           include: {
             user: {
               select: {
@@ -77,18 +95,24 @@ export const getCommentsByDocumentId = async (documentId: string) => {
     return comments
   } catch (error) {
     console.error("Failed to fetch comments:", error)
-    return []
+    return [] // Return empty array on error
   }
 }
 
+/**
+ * Deletes a comment and all its replies
+ * @param commentId - ID of the comment to delete
+ * @returns Success/error object
+ */
 export const deleteComment = async (commentId: string) => {
+  // Verify user session
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, error: "Unauthorized" };
   }
 
   try {
-    // First, find the comment to verify ownership
+    // First verify comment exists and get owner info
     const comment = await db.comment.findUnique({
       where: { id: commentId },
       select: { userId: true }
@@ -98,18 +122,22 @@ export const deleteComment = async (commentId: string) => {
       return { success: false, error: "Comment not found" };
     }
 
-    // Check if the current user is the comment owner
+    // Verify current user is the comment owner
     if (comment.userId !== session.user.id) {
       return { success: false, error: "You can only delete your own comments" };
     }
 
-    // Delete the comment and all its replies (cascade delete)
+    /**
+     * Delete comment and all its replies (cascade delete)
+     * Note: This assumes your database schema has proper cascade delete setup
+     */
     await db.comment.delete({
       where: { id: commentId }
     });
 
-    // Revalidate the page to show updated comments
-    revalidatePath("/"); // Adjust this path as needed
+    // Revalidate the page to show updated comment list
+    revalidatePath("/"); // Adjust path to match your comment display page
+
     return { success: true, message: "Comment deleted successfully" };
   } catch (error) {
     console.error("Failed to delete comment:", error);
