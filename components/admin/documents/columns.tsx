@@ -6,8 +6,9 @@
  * The DocumentActionCell component provides row-level actions (view, edit, delete, comments).
  */
 
-"use client"
+"use client" // Marks this as a Client Component in Next.js
 
+// Import necessary components and libraries
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
@@ -15,11 +16,14 @@ import DocumentActionCell from "./action-cell"
 import { Document, User } from "@/lib/generated/prisma/client"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
+// Type combining Document with User information
 type DocumentWithUser = Document & {
     user: User
 }
 
-
+/**
+ * Column definitions for the documents table
+ */
 export const columns: ColumnDef<DocumentWithUser>[] = [
     {
         accessorKey: "title",
@@ -45,12 +49,14 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
                 return <span className="text-muted-foreground/50">No description</span>;
             }
 
+            // Truncate long descriptions with ellipsis
             const truncated = description.length > maxLength
                 ? `${description.substring(0, maxLength)}...`
                 : description
 
             return (
                 <div className="pl-6 border-l-2 border-muted-foreground/30">
+                    {/* Tooltip shows full description on hover */}
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <span className="line-clamp-2 text-sm">
@@ -64,7 +70,7 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
                 </div>
             )
         },
-        size: 300,
+        size: 300, // Column width
     },
     {
         accessorKey: "subject",

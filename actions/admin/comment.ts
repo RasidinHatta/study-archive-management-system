@@ -1,10 +1,14 @@
-"use server"
+"use server" // Marks all exports as server actions
 
 import { auth } from "@/auth"
 import db from "@/prisma/prisma"
 import { revalidatePath } from "next/cache"
 
-
+/**
+ * Fetches a comment by ID with associated user and document info
+ * @param {string} commentId - The ID of the comment to fetch
+ * @returns success: boolean, data?: CommentWithRelations, error?: string
+ */
 export const getCommentById = async (commentId: string) => {
     try {
         const comment = await db.comment.findUnique({
@@ -41,7 +45,7 @@ export const getCommentById = async (commentId: string) => {
             success: true,
             data: {
                 ...comment,
-                isReply: !!comment.parentId,
+                isReply: !!comment.parentId, // Flag indicating if this is a reply
             },
         }
     } catch (error) {
@@ -50,6 +54,11 @@ export const getCommentById = async (commentId: string) => {
     }
 }
 
+/**
+ * Fetches basic user information by ID
+ * @param {string} userId - The ID of the user to fetch
+ * @returns success: boolean, data?: UserBasicInfo, error?: string
+ */
 export const getUserById = async (userId: string) => {
     try {
         const user = await db.user.findUnique({
@@ -73,7 +82,11 @@ export const getUserById = async (userId: string) => {
     }
 }
 
-// You already have getDocumentByCommentId
+/**
+ * Fetches document information associated with a comment
+ * @param {string} commentId - The ID of the comment
+ * @returns success: boolean, data?: DocumentInfo, error?: string
+ */
 export const getDocumentByCommentId = async (commentId: string) => {
     try {
         const result = await db.comment.findUnique({
@@ -115,11 +128,16 @@ export const getDocumentByCommentId = async (commentId: string) => {
     }
 }
 
+/**
+ * Fetches all replies to a specific comment
+ * @param {string} commentId - The ID of the parent comment
+ * @returns success: boolean, data?: Reply[], error?: string
+ */
 export const getRepliesByCommentId = async (commentId: string) => {
     try {
         const replies = await db.comment.findMany({
             where: {
-                parentId: commentId, // Find all comments where parentId matches the commentId
+                parentId: commentId, // Find all child comments
             },
             select: {
                 id: true,
@@ -135,7 +153,7 @@ export const getRepliesByCommentId = async (commentId: string) => {
                 },
             },
             orderBy: {
-                createdAt: 'asc', // Order replies by creation date (oldest first)
+                createdAt: 'asc', // Oldest replies first
             },
         })
 
@@ -143,7 +161,7 @@ export const getRepliesByCommentId = async (commentId: string) => {
             success: true,
             data: replies.map(reply => ({
                 ...reply,
-                // Ensure user object exists even if user was deleted
+                // Handle case where user might be deleted
                 user: reply.user || { id: 'deleted-user', name: 'Deleted User', email: '' }
             })),
         }
@@ -153,13 +171,20 @@ export const getRepliesByCommentId = async (commentId: string) => {
     }
 }
 
+/**
+ * Deletes a comment by ID (admin only)
+ * @param {string} id - The ID of the comment to delete
+ * @returns success: boolean, error?: string
+ */
 export const deleteCommentById = async (id: string) => {
   try {
+    // Verify admin authentication
     const session = await auth()
     if (!session?.user) {
       return { success: false, error: "Unauthorized" }
     }
 
+    // Verify comment exists
     const comment = await db.comment.findUnique({
       where: { id },
     })
@@ -168,10 +193,12 @@ export const deleteCommentById = async (id: string) => {
       return { success: false, error: "Comment not found" }
     }
 
+    // Perform deletion
     await db.comment.delete({
       where: { id },
     })
 
+    // Refresh the comments page
     revalidatePath("/admin/comments")
 
     return { success: true }
@@ -184,30 +211,35 @@ export const deleteCommentById = async (id: string) => {
   }
 }
 
+/**
+ * Updates a comment's content (admin only)
+ * @param {string} commentId - The ID of the comment to update
+ * @param {Object} data - Update data (currently just content)
+ * @returns success: boolean, error?: string
+ */
 export const editCommentById = async (
   commentId: string,
   data: {
     content?: string
   }
-): Promise<{
-  success: boolean
-  error?: string
-  comment?: Comment
-}> => {
+) => {
   try {
+    // Verify admin authentication
     const session = await auth()
     if (!session?.user) {
       return { success: false, error: "Unauthorized" }
     }
 
+    // Perform update with automatic timestamp
     await db.comment.update({
       where: { id: commentId },
       data: {
         ...data,
-        updatedAt: new Date(),
+        updatedAt: new Date(), // Always update the timestamp
       },
     })
 
+    // Refresh the comments page
     revalidatePath("/admin/comments")
 
     return {

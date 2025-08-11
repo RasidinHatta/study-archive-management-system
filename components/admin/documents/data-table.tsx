@@ -6,7 +6,7 @@
  * The table is styled with custom UI components and provides a global search for title and description.
  */
 
-"use client"
+"use client" // Marks this as a Client Component in Next.js
 
 import * as React from "react"
 import {
@@ -41,20 +41,35 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react"
 
+/**
+ * Props for the DataTable component
+ * @template TData - The type of data in the table
+ * @template TValue - The type of value in the columns
+ */
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
+/**
+ * DataTable component - A reusable table component with sorting, filtering, and pagination
+ * @param {ColumnDef<TData, TValue>[]} columns - Column definitions
+ * @param {TData[]} data - Table data
+ */
 export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  // State for table functionality
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
 
+  /**
+   * Custom filter function for global search
+   * Searches both title and description fields
+   */
   const globalFilterFn: FilterFn<TData> = (row, _columnId, filterValue) => {
     const title = String(row.getValue("title") ?? "").toLowerCase()
     const description = String(row.getValue("description") ?? "").toLowerCase()
@@ -62,6 +77,7 @@ export function DataTable<TData, TValue>({
     return title.includes(search) || description.includes(search)
   }
 
+  // Initialize the table with configurations
   const table = useReactTable({
     data,
     columns,
@@ -84,13 +100,16 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4 w-full">
+      {/* Table controls (search and column visibility) */}
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+        {/* Global search input */}
         <Input
           placeholder="Search by title or description..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
+        {/* Column visibility dropdown */}
         <div className="ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -115,6 +134,7 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
+      {/* The table itself */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -154,6 +174,7 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
+      {/* Pagination controls */}
       <div className="flex justify-center items-center gap-2">
         <Button
           variant="outline"

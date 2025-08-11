@@ -1,23 +1,30 @@
-"use server"
+"use server" // Marks all exports as server actions
 
 import db from "@/prisma/prisma"
 import { revalidatePath } from "next/cache"
 import cloudinary from 'cloudinary'
 
+// Cloudinary configuration
 const cloudinaryAppName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 
-
+/**
+ * Fetches a document by ID with associated user data
+ * @param {string} id - Document ID to fetch
+ * @returns {Promise<{success: boolean, data?: Document, error?: string}>} 
+ * Returns document with ISO date strings or error
+ */
 export const getDocumentById = async (id: string) => {
     try {
         const doc = await db.document.findUnique({
             where: { id },
-            include: { user: true }
+            include: { user: true } // Include author details
         })
 
         if (!doc) {
             return { success: false, error: "Document not found" }
         }
 
+        // Convert dates to ISO strings for client-side serialization
         return {
             success: true,
             data: {
@@ -32,11 +39,17 @@ export const getDocumentById = async (id: string) => {
     }
 }
 
+/**
+ * Fetches all comments for a specific document
+ * @param {string} id - Document ID
+ * @returns {Promise<{success: boolean, data?: Comment[], error?: string}>} 
+ * Returns comments with user data or error
+ */
 export const getDocumentComments = async (id: string) => {
     try {
         const comments = await db.comment.findMany({
             where: { documentId: id },
-            include: { user: true } // Make sure to include the user
+            include: { user: true } // Include comment author details
         });
 
         if (!comments) {
@@ -53,17 +66,20 @@ export const getDocumentComments = async (id: string) => {
     }
 }
 
+/**
+ * Updates a document's title and/or description
+ * @param {string} documentId - ID of document to update
+ * @param {Object} data - Update fields (title and/or description)
+ * @returns success: boolean, error?: string
+ * Returns success status or validation/update error
+ */
 export const editDocumentById = async (
     documentId: string,
     data: {
         title?: string
         description?: string | null
     }
-): Promise<{
-    success: boolean
-    error?: string
-    document?: Document
-}> => {
+) => {
     try {
         // Input validation
         if (data.title && data.title.trim().length < 2) {
@@ -78,30 +94,32 @@ export const editDocumentById = async (
             return { success: false, error: "Description cannot exceed 500 characters" }
         }
 
-        // Prepare update data
+        // Prepare update data with automatic updatedAt timestamp
         const updateData: {
             title?: string
             description?: string | null
             updatedAt: Date
         } = {
-            updatedAt: new Date(),
+            updatedAt: new Date(), // Always update the timestamp
         }
 
-        // Only include title if provided
+        // Only include changed fields
         if (data.title) {
             updateData.title = data.title
         }
 
-        // Only include description if it's not an empty string
-        if (data.description !== undefined && data.description !== "") {
-            updateData.description = data.description
+        // Handle empty string as null (description removal)
+        if (data.description !== undefined) {
+            updateData.description = data.description || null
         }
 
+        // Perform the update
         await db.document.update({
             where: { id: documentId },
             data: updateData,
         })
 
+        // Revalidate the documents page to show fresh data
         revalidatePath("/admin/documents")
 
         return {
@@ -110,6 +128,7 @@ export const editDocumentById = async (
     } catch (error) {
         console.error("Document update failed:", error)
 
+        // Type-safe error handling
         if (error instanceof Error) {
             return {
                 success: false,
@@ -124,35 +143,40 @@ export const editDocumentById = async (
     }
 }
 
+/**
+ * Deletes a document from database and Cloudinary
+ * @param {string} id - Document ID to delete
+ * @returns success: boolean, error?: string
+ * Returns success status or deletion error
+ */
 export const deleteDocumentById = async (id: string) => {
   try {
-    // First get the document to obtain the publicId before deleting
+    // First get the document to obtain the Cloudinary publicId
     const document = await db.document.findUnique({
       where: { id },
-      select: { publicId: true }
+      select: { publicId: true } // Only fetch what we need
     });
 
     if (!document) {
       return { success: false, error: "Document not found" };
     }
 
-    // Delete from database
+    // Delete from database first (more critical operation)
     await db.document.delete({
       where: { id }
     });
 
-    // If publicId exists, delete from Cloudinary
+    // If document has a Cloudinary ID, attempt to delete from storage
     if (document.publicId) {
       try {
         await deleteDocumentFromCloudinary(document.publicId);
       } catch (cloudinaryError) {
         console.error("Cloudinary deletion failed:", cloudinaryError);
-        // You might want to handle this differently - maybe just log the error
-        // but still consider the database deletion successful
+        // Continue despite Cloudinary failure - the database record is already gone
       }
     }
 
-    // Revalidate the path
+    // Revalidate the documents page
     revalidatePath("/admin/documents");
     return { success: true };
   } catch (error) {
@@ -164,6 +188,12 @@ export const deleteDocumentById = async (id: string) => {
   }
 }
 
+/**
+ * Helper function to delete a document from Cloudinary
+ * @param {string} publicId - Cloudinary public ID
+ * @returns Cloudinary deletion result
+ * @throws {Error} If deletion fails
+ */
 export const deleteDocumentFromCloudinary = async (publicId: string) => {
   try {
     const result = await cloudinary.v2.uploader.destroy(publicId);
