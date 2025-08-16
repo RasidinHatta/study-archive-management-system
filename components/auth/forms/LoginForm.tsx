@@ -70,6 +70,7 @@ const LoginForm = () => {
             title="Login"
             backButtonHref="/register"
             backButtonLabel="Dont have an account?"
+            className='max-w-full'
         >
             {/* Main form container */}
             <Form {...form}>

@@ -99,6 +99,7 @@ const RegisterForm = () => {
       title="Register"
       backButtonHref="/login"
       backButtonLabel="Already have an account"
+      className="max-w-full"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

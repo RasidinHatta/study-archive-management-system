@@ -42,13 +42,14 @@ const AdminLoginForm = () => {
             }
         });
     };
-    
+
     return (
         <CardWrapper
             headerLabel="Welcome Back"
             title="Login"
             backButtonHref="#"
             backButtonLabel=""
+            className="max-w-full"
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

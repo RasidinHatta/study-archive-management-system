@@ -45,6 +45,7 @@ const VerifyEmailForm = () => {
             title="Confirming now..."
             backButtonHref="/login"
             backButtonLabel="Continue to login"
+            className="max-w-full"
         >
             <div className="flex items-center w-full justify-center">
                 {!success && !error && <p>Loading</p>}

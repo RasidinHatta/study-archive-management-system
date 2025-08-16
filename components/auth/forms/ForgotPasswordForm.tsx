@@ -46,6 +46,7 @@ const ForgotPasswordForm = () => {
             title="Forgot Password"
             backButtonHref="/login"
             backButtonLabel="Cancel"
+            className="max-w-full"
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

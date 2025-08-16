@@ -77,6 +77,7 @@ const ResetPasswordForm = () => {
                 title="Reset Password"
                 backButtonHref="/login"
                 backButtonLabel="Back to login"
+                className="max-w-full"
             >
                 <div className="flex justify-center items-center p-6">
                     Loading token...
@@ -91,6 +92,7 @@ const ResetPasswordForm = () => {
             title="Reset Password"
             backButtonHref="/login"
             backButtonLabel="Back to login"
+            className="max-w-full"
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -123,7 +125,7 @@ const ResetPasswordForm = () => {
                                                     style={{
                                                         width: `${strength}%`,
                                                         backgroundColor: `hsl(var(--${strength < 40 ? 'destructive' :
-                                                                strength < 70 ? 'warning' : 'success'
+                                                            strength < 70 ? 'warning' : 'success'
                                                             }))`
                                                     }}
                                                 />
@@ -132,8 +134,8 @@ const ResetPasswordForm = () => {
                                                 {requirements.map((req, i) => (
                                                     <div key={i} className="flex items-center">
                                                         <span className={`inline-block w-2 h-2 rounded-full mr-1 ${req.regex.test(field.value)
-                                                                ? 'bg-success'
-                                                                : 'bg-muted-foreground/20'
+                                                            ? 'bg-success'
+                                                            : 'bg-muted-foreground/20'
                                                             }`} />
                                                         <span className={req.regex.test(field.value)
                                                             ? 'text-foreground'
