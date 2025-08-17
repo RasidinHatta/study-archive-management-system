@@ -20,7 +20,8 @@ const Page = async ({
 }: PageProps & { 
   searchParams: CustomSearchParams 
 }) => {
-  const query = searchParams.q?.toLowerCase() || '';
+  const search = await searchParams
+  const query = search.q?.toLowerCase() || '';
   const session = await auth()
   const role = session?.user?.role.name
 

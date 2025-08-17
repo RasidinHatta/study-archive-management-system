@@ -1,65 +1,69 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react"
+import { FileText } from "lucide-react" // document icon
 
-/**
- * Props interface for DocumentViewer component
- * @property pdfPath - URL or path to the PDF file to be displayed
- */
 interface DocumentViewerProps {
-    pdfPath: string;
+  pdfPath: string
+  /**
+   * Optional callback fired when the internal loading state changes.
+   * Useful to sync other UI (e.g., avatar skeleton) with the viewer.
+   */
+  onLoadingChange?: (isLoading: boolean) => void
 }
 
 /**
  * DocumentViewer Component
- * 
- * A component that renders a PDF document in an iframe for preview.
- * Handles the PDF URL state and provides a loading state while preparing the viewer.
- * 
- * Features:
- * - Displays PDFs in an embedded iframe
- * - Shows loading state while initializing
- * - Responsive width with fixed height
- * - Simple error handling (falls back to loading message)
+ *
+ * Displays a PDF inside an iframe with a document-style skeleton while loading.
+ * Uses shadcn theme tokens (CSS variables) instead of hard-coded color classes.
  */
-const DocumentViewer: React.FC<DocumentViewerProps> = ({ pdfPath }) => {
-    // State to manage the PDF URL
-    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+const DocumentViewer: React.FC<DocumentViewerProps> = ({ pdfPath, onLoadingChange }) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
-    /**
-     * Effect to handle PDF URL initialization
-     * Runs whenever the pdfPath prop changes
-     */
-    useEffect(() => {
-        // Set the PDF URL from props
-        // This could be extended to handle URL processing or validation
-        setPdfUrl(pdfPath);
-    }, [pdfPath]);
+  // keep parent in sync if callback provided
+  useEffect(() => {
+    onLoadingChange?.(loading)
+  }, [loading, onLoadingChange])
 
-    return (
-        <div className="pdf-viewer-container">
-            {pdfUrl ? (
-                // PDF Preview iframe
-                <iframe
-                    src={pdfUrl}
-                    title="PDF Preview"
-                    width="100%"  // Responsive width
-                    height="600px" // Fixed height (consider making this configurable)
-                    style={{ 
-                        marginTop: '20px', 
-                        border: '1px solid #ccc',
-                        borderRadius: '4px' // Added for better visual appearance
-                    }}
-                    // Consider adding these for better accessibility:
-                    aria-label="PDF document preview"
-                    loading="lazy"
-                />
-            ) : (
-                // Loading state
-                <p className="pdf-loading-text">Loading PDF preview...</p>
-            )}
+  useEffect(() => {
+    if (pdfPath) {
+      setPdfUrl(pdfPath)
+      // new pdf -> go back to loading
+      setLoading(true)
+    } else {
+      setPdfUrl(null)
+      setLoading(false)
+    }
+  }, [pdfPath])
+
+  return (
+    <div className="pdf-viewer-container mt-4">
+      {loading && (
+        <div className="flex flex-col items-center justify-center space-y-4 border border-border rounded-md h-[600px]">
+          {/* Document Icon */}
+          <FileText className="w-12 h-12 text-muted-foreground" />
+
+          {/* Loading text (centered) */}
+          <p className="text-sm text-muted-foreground text-center">Document Loading...</p>
         </div>
-    );
-};
+      )}
 
-export default DocumentViewer;
+      {pdfUrl && (
+        <iframe
+          src={pdfUrl}
+          title="PDF Preview"
+          width="100%"
+          height="600px"
+          className={`mt-4 border border-border rounded-md ${loading ? "hidden" : "block"}`}
+          aria-label="PDF document preview"
+          loading="eager"
+          onLoad={() => setLoading(false)} // stop skeleton once iframe loads
+        />
+      )}
+    </div>
+  )
+}
+
+export default DocumentViewer

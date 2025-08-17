@@ -36,13 +36,14 @@ const DocumentPage = async ({ params }: DocumentPageProps) => {
               author={document.user?.name || "Anonymous"}
               authorImage={document.user?.image}
             />
-          </div>
 
-          <CommentSection
-            documentId={id}
-            user={user}
-            comments={comments}
-          />
+
+            <CommentSection
+              documentId={id}
+              user={user}
+              comments={comments}
+            />
+          </div>
         </>
       ) : (
         <DocumentNotFound />

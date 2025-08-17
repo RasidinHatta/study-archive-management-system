@@ -1,141 +1,203 @@
 "use client"
 
 import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-    CardFooter,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
 } from "@/components/ui/avatar";
 import DocumentViewer from "./DocumentViewer";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Skeleton } from "../ui/skeleton";
+import DocumentCardHeader from "./DocumentCardHeader";
 
 /**
  * Props interface for DocumentCard component
- * @property title - Document title
- * @property description - Optional document description
- * @property url - URL to the document file
- * @property author - Name of the document author
- * @property authorImage - Optional URL to the author's avatar image
  */
 interface DocumentCardProps {
-    title: string;
-    description?: string | null;
-    url: string;
-    author: string;
-    authorImage?: string | null;
+  title: string;
+  description?: string | null;
+  url: string;
+  author: string;
+  authorImage?: string | null;
 }
 
-/**
- * DocumentCard Component
- * 
- * A reusable card component that displays document information with:
- * - Document preview
- * - Author information
- * - Download functionality
- * 
- * Features:
- * - PDF viewer integration
- * - Graceful fallbacks for missing descriptions/avatars
- * - Cross-browser download handling
- * - Responsive design
- */
+const AVATAR_TIMEOUT_MS = 3000; // safety fallback if avatar never loads
+
 const DocumentCard = ({
-    title,
-    description,
-    url,
-    author,
-    authorImage,
+  title,
+  description,
+  url,
+  author,
+  authorImage,
 }: DocumentCardProps) => {
-    /**
-     * Handles document download with proper browser compatibility
-     * Falls back to opening in new tab if direct download fails
-     */
-    const handleDownload = async () => {
-        try {
-            // Fetch the document as a blob
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
+  // viewerLoading is true while DocumentViewer is loading the PDF
+  const [viewerLoading, setViewerLoading] = useState<boolean>(true);
 
-            // Create invisible download link
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            // Sanitize filename and force PDF extension
-            link.download = `${title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+  // avatarStillLoading tracks the actual avatar preload state.
+  // initialize to true only if there's an authorImage to load
+  const [avatarStillLoading, setAvatarStillLoading] = useState<boolean>(
+    !!authorImage
+  );
 
-            // These additional steps help trigger the dialog in more browsers
-            link.style.display = 'none';
-            link.target = '_blank';
-            document.body.appendChild(link);
+  const timeoutRef = useRef<number | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
-            // Simulate click with custom event (helps in some browsers)
-            const clickEvent = new MouseEvent('click', {
-                view: window,
-                bubbles: true,
-                cancelable: true
-            });
-            link.dispatchEvent(clickEvent);
+  // callback passed to DocumentViewer to sync loading state
+  const handleViewerLoadingChange = useCallback((isLoading: boolean) => {
+    setViewerLoading(isLoading);
+  }, []);
 
-            // Cleanup DOM and memory
-            setTimeout(() => {
-                document.body.removeChild(link);
-                URL.revokeObjectURL(blobUrl);
-            }, 100);
+  // Preload avatar when authorImage changes
+  useEffect(() => {
+    // cleanup previous
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (imgRef.current) {
+      imgRef.current.onload = null;
+      imgRef.current.onerror = null;
+      imgRef.current = null;
+    }
 
-        } catch (error) {
-            console.error('Download failed:', error);
-            // Fallback to opening in new tab if download fails
-            window.open(url, '_blank');
-        }
+    if (!authorImage) {
+      // no remote image -> show fallback immediately
+      setAvatarStillLoading(false);
+      return;
+    }
+
+    setAvatarStillLoading(true);
+
+    const img = new Image();
+    imgRef.current = img;
+
+    // If the avatar host requires CORS, you may need to set crossOrigin:
+    // img.crossOrigin = "anonymous";
+
+    const handleLoaded = () => {
+      setAvatarStillLoading(false);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
 
-    return (
-        <Card className="hover:shadow-lg transition-shadow flex flex-col">
-            {/* Card Header with title and description */}
-            <CardHeader>
-                <CardTitle className="truncate">{title}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                    {description || "No description provided."}
-                </CardDescription>
-            </CardHeader>
+    const handleError = () => {
+      // image failed to load -> show fallback (initial)
+      setAvatarStillLoading(false);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
 
-            {/* Document preview area */}
-            <CardContent className="p-0 flex-1">
-                <DocumentViewer pdfPath={url} />
-            </CardContent>
+    img.onload = handleLoaded;
+    img.onerror = handleError;
 
-            {/* Footer with author info and download button */}
-            <CardFooter className="flex items-center justify-between pt-4">
-                {/* Author information with avatar */}
-                <div className="flex items-center space-x-2">
-                    <Avatar className="h-6 w-6">
-                        <AvatarImage src={authorImage || undefined} />
-                        <AvatarFallback>{author.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{author}</span>
-                </div>
+    // Start loading
+    img.src = authorImage;
 
-                {/* Download button */}
-                <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1"
-                    onClick={handleDownload}
-                >
-                    <Download className="w-4 h-4" />
-                    Download
-                </Button>
-            </CardFooter>
-        </Card>
-    );
+    // Safety fallback: if image hasn't fired load/error in X ms, give up and show fallback
+    timeoutRef.current = window.setTimeout(() => {
+      // If still waiting, mark as not loading (show fallback)
+      setAvatarStillLoading(false);
+      timeoutRef.current = null;
+    }, AVATAR_TIMEOUT_MS);
+
+    // cleanup on unmount / authorImage change
+    return () => {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (imgRef.current) {
+        imgRef.current.onload = null;
+        imgRef.current.onerror = null;
+        imgRef.current = null;
+      }
+    };
+  }, [authorImage]);
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
+      link.style.display = "none";
+      link.target = "_blank";
+      document.body.appendChild(link);
+      const clickEvent = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      link.dispatchEvent(clickEvent);
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+    } catch (error) {
+      console.error("Download failed:", error);
+      window.open(url, "_blank");
+    }
+  };
+
+  // show skeleton while either the viewer or avatar image is still loading
+  const showAuthorSkeleton = viewerLoading || avatarStillLoading;
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow flex flex-col">
+      <CardHeader>
+        <DocumentCardHeader title={title} description={description ?? ""}/>
+      </CardHeader>
+
+      <CardContent className="p-0 flex-1">
+        {/* pass the loading callback to the viewer */}
+        <DocumentViewer pdfPath={url} onLoadingChange={handleViewerLoadingChange} />
+      </CardContent>
+
+      <CardFooter className="flex items-center justify-between pt-4">
+        <div className="flex items-center space-x-2">
+          {showAuthorSkeleton ? (
+            <>
+              <Skeleton className="rounded-full h-6 w-6" />
+              <div className="w-24">
+                <Skeleton className="h-4 w-full" />
+              </div>
+            </>
+          ) : (
+            <>
+              <Avatar className="h-6 w-6">
+                {/* Use AvatarImage only for display — preload above handles loading logic.
+                    If AvatarImage forwards onLoad/onError props, you may remove preload. */}
+                <AvatarImage src={authorImage || undefined} />
+                <AvatarFallback>{author.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm">{author}</span>
+            </>
+          )}
+        </div>
+
+        <Button size="sm" variant="outline" className="gap-1" onClick={handleDownload}>
+          <Download className="w-4 h-4" />
+          Download
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 };
 
 export default DocumentCard;
