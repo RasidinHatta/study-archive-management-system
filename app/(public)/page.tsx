@@ -35,7 +35,7 @@ export default function Home() {
           <Button
             asChild
             size="lg"
-            className="rounded-full px-8 transition-all duration-300 hover:scale-105 hover:bg-accent hover:text-accent-foreground bg-foreground text-background"
+            className="rounded-full px-8 transition-all duration-300 hover:scale-105 hover:bg-foreground hover:text-background bg-accent text-foreground"
           >
             <Link href="/community">
               Browse Documents
