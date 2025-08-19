@@ -110,6 +110,7 @@ export const UserImageSchema = z.object({
  * - Optional main ID for thread tracking
  */
 export const CommentSchema = z.object({
+    userId: z.string(),
     content: z.string().min(1, "Comment cannot be empty"),
     documentId: z.string(),
     parentId: z.string().optional(),

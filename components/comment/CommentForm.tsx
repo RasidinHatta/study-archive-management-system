@@ -19,9 +19,11 @@ import { Button } from "../ui/button";
  * @property parentId - Optional parent comment ID for replies
  * @property mainId - Optional main comment ID for nested replies
  * @property onSuccess - Callback function to execute after successful comment submission
+ * @property onCancel - Optional callback function to execute when cancel is clicked
  */
 type CommentFormProps = {
   user: {
+    id?: string | null;
     name?: string | null;
     image?: string | null;
   };
@@ -29,6 +31,7 @@ type CommentFormProps = {
   parentId?: string;
   mainId?: string;
   onSuccess?: () => void;
+  onCancel?: () => void;
 };
 
 /**
@@ -45,6 +48,7 @@ type CommentFormProps = {
  * - Character count limit
  * - User avatar display
  * - Loading states
+ * - Cancel button for reply mode
  */
 const CommentForm = ({
   user,
@@ -52,23 +56,26 @@ const CommentForm = ({
   parentId,
   mainId,
   onSuccess,
+  onCancel,
 }: CommentFormProps) => {
   // State for loading indicator and character count
   const [loading, setLoading] = useState(false);
   const [charCount, setCharCount] = useState(0);
-  
+
   // Ref for the editor container
   const editorRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const userId = user.id
 
-  // Form initialization with Zod validation
+  // Form initialization with Zod validation - add userId to default values
   const form = useForm<z.infer<typeof CommentSchema>>({
     resolver: zodResolver(CommentSchema),
     defaultValues: {
       content: "",
       documentId,
       parentId,
-      mainId: parentId ? mainId : undefined, // Only set mainId if this is a reply
+      mainId: parentId ? mainId : undefined,
+      userId: user?.id || "", // Add userId to default values
     },
   });
 
@@ -77,13 +84,23 @@ const CommentForm = ({
    * Creates a new comment or reply and handles the response
    */
   const onSubmit = async () => {
+    // Check if user ID is available
+    if (!user?.id) {
+      toast.error("You must be logged in to comment");
+      return;
+    }
+
     setLoading(true);
     try {
+      // Get all form values including userId
+      const formData = form.getValues();
+
       const res = await createComment({
-        content: form.watch("content"),
-        documentId,
-        parentId,
-        mainId: parentId ? mainId : undefined
+        userId: user.id, // Use the user.id directly
+        content: formData.content,
+        documentId: formData.documentId,
+        parentId: formData.parentId,
+        mainId: formData.mainId
       });
 
       if (res.success) {
@@ -100,6 +117,16 @@ const CommentForm = ({
     } finally {
       setLoading(false); // Reset loading state
     }
+  };
+
+  /**
+   * Handles cancel action
+   * Resets the form and calls the onCancel callback if provided
+   */
+  const handleCancel = () => {
+    form.reset();
+    setCharCount(0);
+    onCancel?.();
   };
 
   /**
@@ -211,19 +238,35 @@ const CommentForm = ({
           />
         </div>
 
-        {/* Footer with character count and submit button */}
+        {/* Footer with character count and action buttons */}
         <div className="flex justify-between items-center">
           <span className="text-xs text-muted-foreground">
             {charCount}/1000 characters
           </span>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={loading || !form.watch("content").trim()}
-            className="rounded-md px-4 h-10 text-secondary"
-          >
-            {loading ? "Sending..." : "Send"}
-          </Button>
+          <div className="flex gap-2">
+            {/* Cancel button (only shown when onCancel is provided) */}
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                disabled={loading}
+                className="rounded-md px-4 h-10"
+              >
+                Cancel
+              </Button>
+            )}
+            {/* Submit button */}
+            <Button
+              type="submit"
+              size="sm"
+              disabled={loading || !form.watch("content").trim() || !user?.id}
+              className="rounded-md px-4 h-10 text-secondary"
+            >
+              {loading ? "Sending..." : "Send"}
+            </Button>
+          </div>
         </div>
       </div>
     </form>

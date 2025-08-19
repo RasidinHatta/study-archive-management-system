@@ -5,7 +5,7 @@ import { getDocumentById } from '@/data/document'
 import DocumentNotFound from '@/components/not-found/DocumentNotFound'
 import { Metadata } from 'next'
 import { auth } from '@/auth'
-import { getCommentsByDocumentId } from '@/actions/comment'
+import { getCommentsByDocumentId } from '@/data/comment'
 import CommentSection from '@/components/comment/CommentSection'
 
 export const metadata: Metadata = {
@@ -36,7 +36,6 @@ const DocumentPage = async ({ params }: DocumentPageProps) => {
               author={document.user?.name || "Anonymous"}
               authorImage={document.user?.image}
             />
-
 
             <CommentSection
               documentId={id}

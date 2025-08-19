@@ -43,3 +43,44 @@ export const getAllCommentWithDocAndUser = async () => {
     
     return comments;
 };
+
+/**
+ * Fetches all comments for a document including nested replies
+ * @param documentId - ID of the document to fetch comments for
+ * @returns Array of comments with user data and nested replies
+ */
+export const getCommentsByDocumentId = async (documentId: string) => {
+  try {
+    const comments = await db.comment.findMany({
+      where: { documentId },
+      orderBy: { createdAt: "desc" }, // Newest comments first
+      include: {
+        // Include author info
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        // Include replies with their authors
+        replies: {
+          orderBy: { createdAt: "desc" }, // Newest replies first
+          include: {
+            user: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    return comments
+  } catch (error) {
+    console.error("Failed to fetch comments:", error)
+    return [] // Return empty array on error
+  }
+}

@@ -12,11 +12,6 @@ import * as z from "zod"
  * @returns Success message or error object
  */
 export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
-  // Verify user session
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { error: "Unauthorized" };
-  }
 
   // Validate input data using Zod schema
   const parse = CommentSchema.safeParse(rawData);
@@ -25,7 +20,7 @@ export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
   }
 
   // Extract validated data
-  const { content, documentId, parentId, mainId } = parse.data;
+  const { userId, content, documentId, parentId, mainId } = parse.data;
 
   try {
     /**
@@ -42,7 +37,7 @@ export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
       data: {
         content,
         documentId,
-        userId: session.user.id,
+        userId,
         parentId: parentId ?? null, // Ensure null instead of undefined
         mainId: actualMainId,
       },
@@ -57,47 +52,6 @@ export const createComment = async (rawData: z.infer<typeof CommentSchema>) => {
     };
   }
 };
-
-/**
- * Fetches all comments for a document including nested replies
- * @param documentId - ID of the document to fetch comments for
- * @returns Array of comments with user data and nested replies
- */
-export const getCommentsByDocumentId = async (documentId: string) => {
-  try {
-    const comments = await db.comment.findMany({
-      where: { documentId },
-      orderBy: { createdAt: "desc" }, // Newest comments first
-      include: {
-        // Include author info
-        user: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        // Include replies with their authors
-        replies: {
-          orderBy: { createdAt: "desc" }, // Newest replies first
-          include: {
-            user: {
-              select: {
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    return comments
-  } catch (error) {
-    console.error("Failed to fetch comments:", error)
-    return [] // Return empty array on error
-  }
-}
 
 /**
  * Deletes a comment and all its replies

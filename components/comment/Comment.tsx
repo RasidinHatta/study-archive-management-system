@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import CommentForm from "./CommentForm";
 import { CommentType, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "../ui/button";
@@ -17,11 +16,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "../ui/dialog";
-import ReactMarkdown from "react-markdown";
-import { PrismAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import ReactMarkdownFormat from "./reactMarkdownFormat";
 
 interface CommentProps {
   comment: CommentType;
@@ -29,6 +24,8 @@ interface CommentProps {
   user?: User | null;
   isReply?: boolean;
   replyChain?: string[];
+  onStartReply?: (parentId: string, mainId: string, replyingTo: string) => void;
+  isReplying?: boolean;
 }
 
 const Comment: React.FC<CommentProps> = ({
@@ -37,25 +34,27 @@ const Comment: React.FC<CommentProps> = ({
   user,
   isReply = false,
   replyChain = [],
+  onStartReply,
+  isReplying = false,
 }) => {
-  const [showReply, setShowReply] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
-  const toggleReply = useCallback(() => {
-    setShowReply((prev) => !prev);
-  }, []);
-
   const toggleReplies = useCallback(() => {
     setShowReplies((prev) => !prev);
   }, []);
 
-  const handleSuccess = useCallback(() => {
-    setShowReply(false);
-    router.refresh();
-  }, [router]);
+  const handleStartReply = useCallback(() => {
+    if (onStartReply) {
+      onStartReply(
+        comment.id, 
+        comment.mainId || comment.id, 
+        comment.user?.name || "Anonymous"
+      );
+    }
+  }, [onStartReply, comment.id, comment.mainId, comment.user?.name]);
 
   const handleDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -83,7 +82,7 @@ const Comment: React.FC<CommentProps> = ({
   const isOwner = user?.id === comment.user?.id;
 
   return (
-    <div className={`flex gap-3 ${isReply ? "ml-6 mt-3" : ""}`}>
+    <div className={`flex gap-3 ${isReply ? "ml-6" : ""}`}>
       <Avatar className="w-8 h-8 mt-1">
         <AvatarImage src={comment.user?.image || undefined} />
         <AvatarFallback>
@@ -106,176 +105,20 @@ const Comment: React.FC<CommentProps> = ({
               {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
             </span>
           </div>
-          <div className="mt-1 text-sm text-muted-foreground">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              components={{
-                code({ node, className, children, ...props }) {
-                  const isInline = (props as any).inline;
-                  const match = /language-(\w+)/.exec(className || "");
-                  return !isInline && match ? (
-                    <SyntaxHighlighter
-                      language={match[1]}
-                      // @ts-ignore
-                      style={oneDark}
-                      customStyle={{ backgroundColor: "transparent" }}
-                      PreTag="div"
-                      className="rounded-md text-sm my-2"
-                      {...props}
-                    >
-                      {String(children).replace(/\n$/, "")}
-                    </SyntaxHighlighter>
-                  ) : (
-                    <code className="bg-muted px-1 py-0.5 rounded text-sm">
-                      {children}
-                    </code>
-                  );
-                },
-                a({ node, href, children, ...props }) {
-                  return (
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                      {...props}
-                    >
-                      {children}
-                    </a>
-                  );
-                },
-                blockquote({ node, children, ...props }) {
-                  return (
-                    <blockquote className="border-l-4 border-muted-foreground pl-3 italic my-2">
-                      {children}
-                    </blockquote>
-                  );
-                },
-                ul({ node, children, ...props }) {
-                  return (
-                    <ul className="list-disc pl-5 my-2" {...props}>
-                      {children}
-                    </ul>
-                  );
-                },
-                ol({ node, children, ...props }) {
-                  return (
-                    <ol className="list-decimal pl-5 my-2" {...props}>
-                      {children}
-                    </ol>
-                  );
-                },
-                h1({ node, children, ...props }) {
-                  return (
-                    <h1 className="text-xl font-bold my-2" {...props}>
-                      {children}
-                    </h1>
-                  );
-                },
-                h2({ node, children, ...props }) {
-                  return (
-                    <h2 className="text-lg font-bold my-2" {...props}>
-                      {children}
-                    </h2>
-                  );
-                },
-                h3({ node, children, ...props }) {
-                  return (
-                    <h3 className="text-base font-bold my-2" {...props}>
-                      {children}
-                    </h3>
-                  );
-                },
-                strong({ node, children, ...props }) {
-                  return (
-                    <strong className="font-semibold" {...props}>
-                      {children}
-                    </strong>
-                  );
-                },
-                em({ node, children, ...props }) {
-                  return (
-                    <em className="italic" {...props}>
-                      {children}
-                    </em>
-                  );
-                },
-                table({ node, children, ...props }) {
-                  return (
-                    <div className="overflow-x-auto my-2">
-                      <table
-                        className="w-full border-collapse border border-muted-foreground/20"
-                        {...props}  // Spread props here
-                      >
-                        {children}
-                      </table>
-                    </div>
-                  );
-                },
-                thead({ node, children, ...props }) {
-                  return (
-                    <thead
-                      className="bg-muted/50"
-                      {...props}  // Spread props here
-                    >
-                      {children}
-                    </thead>
-                  );
-                },
-                tbody({ node, children, ...props }) {
-                  return (
-                    <tbody {...props}>
-                      {children}
-                    </tbody>
-                  );
-                },
-                tr({ node, children, ...props }) {
-                  return (
-                    <tr
-                      className="border-b border-muted-foreground/20"
-                      {...props}  // Spread props here
-                    >
-                      {children}
-                    </tr>
-                  );
-                },
-                th({ node, children, ...props }) {
-                  return (
-                    <th
-                      className="p-2 text-left font-semibold border-r border-muted-foreground/20 last:border-r-0"
-                      {...props}
-                    >
-                      {children}
-                    </th>
-                  );
-                },
-                td({ node, children, ...props }) {
-                  return (
-                    <td
-                      className="p-2 border-r border-muted-foreground/20 last:border-r-0"
-                      {...props}
-                    >
-                      {children}
-                    </td>
-                  );
-                },
-              }}
-            >
-              {comment.content}
-            </ReactMarkdown>
-          </div>
+          <ReactMarkdownFormat comment={comment} />
         </div>
         <div className="flex gap-3 mt-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleReply}
-            className="text-xs text-primary h-6 px-2"
-            aria-expanded={showReply}
-          >
-            {showReply ? "Cancel" : "Reply"}
-          </Button>
+          {onStartReply && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleStartReply}
+              className="text-xs text-primary h-6 px-2"
+              disabled={isReplying}
+            >
+              {isReplying ? "Replying..." : "Reply"}
+            </Button>
+          )}
           {isOwner && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -324,27 +167,18 @@ const Comment: React.FC<CommentProps> = ({
             </Button>
           )}
         </div>
-        {showReply && user && (
-          <div className="mt-3">
-            <CommentForm
-              user={user}
-              documentId={documentId}
-              parentId={comment.id}
-              mainId={comment.mainId || comment.id}
-              onSuccess={handleSuccess}
-            />
-          </div>
-        )}
         {showReplies && hasReplies && (
-          <div className="space-y-3">
+          <div className="mt-3 space-y-3">
             {comment.replies?.map((reply) => (
               <Comment
                 key={reply.id}
                 comment={reply}
                 documentId={documentId}
                 user={user}
-                isReply={true}
+                isReply={true} // All replies get the same isReply=true
                 replyChain={newReplyChain}
+                onStartReply={onStartReply}
+                isReplying={isReplying}
               />
             ))}
           </div>
