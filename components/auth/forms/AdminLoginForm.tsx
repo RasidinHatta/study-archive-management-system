@@ -91,16 +91,11 @@ const AdminLoginForm = () => {
                             )}
                         />
                     </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
+                    <Button type="submit" className="w-full text-background" disabled={loading}>
                         {loading ? "Logging In..." : "Login"}
                     </Button>
                 </form>
             </Form>
-            <div className="mt-4 text-center">
-                <Link href="/forgot-password" className="hover:underline">
-                    Forgot Password?
-                </Link>
-            </div>
         </CardWrapper>
     );
 }

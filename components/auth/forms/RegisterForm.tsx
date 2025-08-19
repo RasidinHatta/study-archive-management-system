@@ -234,8 +234,8 @@ const RegisterForm = () => {
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Loading..." : "Register"}
+          <Button type="submit" className="w-full text-background" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
           </Button>
         </form>
       </Form>

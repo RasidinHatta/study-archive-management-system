@@ -7,18 +7,19 @@ const AuthLayout = async ({
 }: {
     children: React.ReactNode
 }) => {
-    // Unsplash image URL (study/education themed)
-    const unsplashImageUrl = "/background/authBackground.avif";
+    const source = "/background/authBackground"
+    const avifSource = `${source}.avif`
+    const webpSource = `${source}.webp`
 
     return (
         <section className='w-full relative h-screen dark'>
             {/* Background with optimized Next.js Image */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <picture>
-                    <source srcSet="/background/authBackground.avif" type="image/avif" />
-                    <source srcSet="/background/authBackground.webp" type="image/webp" />
+                    <source srcSet={avifSource} type="image/avif" />
+                    <source srcSet={webpSource} type="image/webp" />
                     <Image
-                        src="/background/authBackground.jpg"
+                        src={avifSource}
                         alt="Abstract background"
                         className="h-full w-full object-cover"
                         fill
@@ -36,7 +37,7 @@ const AuthLayout = async ({
                     {/* Image side - Hidden on mobile, visible on md and up */}
                     <div className="hidden md:block md:w-1/2 relative">
                         <Image
-                            src={unsplashImageUrl}
+                            src={avifSource}
                             alt="Students studying together"
                             fill
                             className="object-cover"

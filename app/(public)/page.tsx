@@ -1,89 +1,60 @@
-"use client";
-
-import { Suspense, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
-import CommunitySection from "@/components/documents/CommunitySection";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+const features = [
+  {
+    title: "Upload & Organize",
+    description: "Easily upload documents and manage them with tags, folders, and version history.",
+  },
+  {
+    title: "Read Anywhere",
+    description: "Mobile-friendly viewer supports PDFs, DOCX, PPT, and more — no extra software needed.",
+  },
+  {
+    title: "Share & Collaborate",
+    description: "Control access, leave comments, and collaborate in real-time with your team or audience.",
+  },
+];
 
 export default function Home() {
-  const communityRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-
-  const scrollToCommunity = () => {
-    if (communityRef.current) {
-      communityRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
-    <>
+    <main>
       {/* Hero Section */}
-      <section className="h-screen flex flex-col justify-center items-center px-4 text-center">
-        <h1 className="text-5xl font-extrabold mb-4">Welcome to Study Archive</h1>
-        <p className="text-xl mb-6 max-w-2xl">
+      <section className="min-h-screen flex flex-col justify-center items-center px-4 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to Study Archive</h1>
+        <p className="text-lg md:text-xl mb-8 max-w-2xl text-muted-foreground">
           Upload, read, and share documents seamlessly — your digital library, always accessible.
         </p>
-        <div className="flex gap-4">
-          {/* Get Started Button */}
-          <button
-            onClick={() => router.push("/register")}
-            className="px-6 py-2 rounded-full font-semibold hover:text-foreground hover:bg-background border border-foreground bg-accent-foreground text-primary transition"
-          >
-            Get Started
-          </button>
-
-          {/* Browse Documents Button */}
-          <button
-            onClick={scrollToCommunity}
-            className="hover:bg-background border border-foreground px-6 py-2 rounded-full font-semibold hover:text-foreground bg-accent-foreground text-primary transition"
-          >
-            Browse Documents
-          </button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button asChild size="lg" className="text-background rounded-full px-8 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+            <Link href="/register">
+              Get Started
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-8 transition-all duration-300 hover:scale-105 hover:bg-accent hover:text-accent-foreground">
+            <Link href="/community">
+              Browse Documents
+            </Link>
+          </Button>
         </div>
       </section>
 
-      {/* Separator between Hero and Features Section */}
-      <Separator className="my-12 h-10" />
+      {/* Separator */}
+      <Separator className="my-12" />
 
       {/* Features Section */}
-      <section className="py-20 px-6 text-center">
-        <h2 className="text-4xl font-bold mb-10">Why Use Study Archive?</h2>
-        <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-          {/* Feature 1 */}
-          <div className="bg-muted-foreground p-6 shadow-lg rounded-lg text-background">
-            <h3 className="text-2xl font-semibold mb-3">Upload & Organize</h3>
-            <p>
-              Easily upload documents and manage them with tags, folders, and version history.
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="bg-muted-foreground p-6 shadow-lg rounded-lg text-background">
-            <h3 className="text-2xl font-semibold mb-3">Read Anywhere</h3>
-            <p>
-              Mobile-friendly viewer supports PDFs, DOCX, PPT, and more — no extra software needed.
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="bg-muted-foreground p-6 shadow-lg rounded-lg text-background">
-            <h3 className="text-2xl font-semibold mb-3">Share & Collaborate</h3>
-            <p>
-              Control access, leave comments, and collaborate in real-time with your team or audience.
-            </p>
-          </div>
+      <section className="py-16 px-6 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-12">Why Use Study Archive?</h2>
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {features.map((feature, index) => (
+            <div key={index} className="bg-card p-6 rounded-lg shadow-sm border transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+              <p className="text-muted-foreground">{feature.description}</p>
+            </div>
+          ))}
         </div>
       </section>
-
-      {/* Separator between Features and Community Page Section */}
-      <Separator className="my-12 h-10" />
-
-      {/* Community Page Section */}
-      <div ref={communityRef}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <CommunitySection />
-        </Suspense>
-      </div>
-    </>
+    </main>
   );
 }

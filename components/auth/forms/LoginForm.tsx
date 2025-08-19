@@ -147,8 +147,8 @@ const LoginForm = () => {
                         disabled={isPending}
                     >
                         {showTwoFactor
-                            ? (isPending ? "Confirm..." : "Confirm")
-                            : (isPending ? "Loading..." : "Login")
+                            ? (isPending ? "Confirming..." : "Confirm")
+                            : (isPending ? "Logging In..." : "Login")
                         }
                     </Button>
                 </form>

@@ -168,7 +168,7 @@ const ResetPasswordForm = () => {
                     </div>
                     <FormSuccess message={success} />
                     <FormError message={error} />
-                    <Button type="submit" className="w-full" disabled={loading}>
+                    <Button type="submit" className="w-full text-background" disabled={loading}>
                         {loading ? "Resetting..." : "Reset Password"}
                     </Button>
                 </form>
