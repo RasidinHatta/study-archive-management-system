@@ -1,10 +1,7 @@
 /**
  * Source: /components/admin/user/action-cell.tsx
  *
- * This component renders action controls for a user row in the admin panel.
- * It provides dropdown actions to view, edit, or delete a user.
- * Dialogs are used for viewing user details, confirming deletion, and editing user info.
- * User data is fetched and updated via server actions.
+ * Cleaned / DRY'd version of the user action cell used in the admin table.
  */
 
 "use client"
@@ -32,7 +29,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RoleName } from "@/lib/generated/prisma"
 import { MoreHorizontal } from "lucide-react"
-import { useState, useTransition } from "react"
+import { useCallback, useState, useTransition } from "react"
 import { toast } from "sonner"
 
 type UserDetails = {
@@ -48,7 +45,25 @@ type UserDetails = {
   updatedAt: Date
 }
 
-function ActionCell({
+/** Roles available for selection */
+const AVAILABLE_ROLES: RoleName[] = ["USER", "PUBLICUSER"]
+
+/** Format a date or return fallback text */
+const formatDate = (date: Date | null | string | undefined) =>
+  date ? new Date(date).toLocaleString() : "Not verified"
+
+/** Format boolean to yes/no */
+const formatBoolean = (value: boolean | undefined) => (value ? "Yes" : "No")
+
+/** Normalize server user payload to UserDetails with Date instances */
+const normalizeUserDetails = (data: any): UserDetails => ({
+  ...data,
+  createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+  updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
+  emailVerified: data.emailVerified ? new Date(data.emailVerified) : null,
+})
+
+export default function ActionCell({
   userId,
   userName,
   userEmail,
@@ -67,28 +82,31 @@ function ActionCell({
 
   const [name, setName] = useState(userName)
   const [email] = useState(userEmail)
-  const [roleName, setRoleName] = useState(userRole)
+  const [roleName, setRoleName] = useState<RoleName>(userRole)
 
-  const loadUserDetails = () => {
-    startTransition(async () => {
+  // small helper to wrap async calls with startTransition
+  const run = useCallback((fn: () => Promise<void>) => {
+    startTransition(() => {
+      void fn()
+    })
+  }, [startTransition])
+
+  // Load and show user details dialog
+  const loadUserDetails = useCallback(() => {
+    run(async () => {
       const res = await getUserById(userId)
       if (res.success && res.data) {
-        // Convert string dates back to Date objects
-        setUserDetails({
-          ...res.data,
-          createdAt: new Date(res.data.createdAt),
-          updatedAt: new Date(res.data.updatedAt),
-          emailVerified: res.data.emailVerified ? new Date(res.data.emailVerified) : null
-        })
+        setUserDetails(normalizeUserDetails(res.data))
         setViewOpen(true)
       } else {
         toast.error(res.error || "Failed to load user details")
       }
     })
-  }
+  }, [run, userId])
 
-  const onConfirmDelete = () => {
-    startTransition(async () => {
+  // Confirm delete
+  const onConfirmDelete = useCallback(() => {
+    run(async () => {
       const res = await deleteUserById(userId)
       if (res.success) {
         toast.success("User deleted successfully")
@@ -97,37 +115,30 @@ function ActionCell({
         toast.error(res.error || "Failed to delete user")
       }
     })
-  }
+  }, [run, userId])
 
-  const onConfirmEdit = (e: React.FormEvent) => {
-    e.preventDefault()
-    startTransition(async () => {
-      const res = await editUserById(userId, { name, roleName })
-      if (res.success) {
-        toast.success("User updated successfully")
-        setEditOpen(false)
-      } else {
-        toast.error(res.error || "Failed to update user")
-      }
-    })
-  }
-
-  const formatDate = (date: Date | null) => {
-    return date ? new Date(date).toLocaleString() : 'Not verified'
-  }
-
-  const formatBoolean = (value: boolean) => {
-    return value ? 'Yes' : 'No'
-  }
-
-  const availableRoles: RoleName[] = ["USER", "PUBLICUSER"];
+  // Confirm edit
+  const onConfirmEdit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      run(async () => {
+        const res = await editUserById(userId, { name, roleName })
+        if (res.success) {
+          toast.success("User updated successfully")
+          setEditOpen(false)
+        } else {
+          toast.error(res.error || "Failed to update user")
+        }
+      })
+    },
+    [run, userId, name, roleName]
+  )
 
   return (
-    // make container inline so hover/background stays the shape of the button
-    <div className="inline-flex items-center hover:bg-primary rounded-md">
+    // container inline so hover background wraps trigger square only
+    <div className="inline-flex items-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          {/* apply rounded + hover + transition to the trigger button (square) */}
           <Button
             variant="ghost"
             className="h-8 w-8 p-0 rounded-md hover:bg-primary transition-colors"
@@ -138,14 +149,11 @@ function ActionCell({
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onSelect={loadUserDetails}
-            disabled={isPending}
-          >
+          <DropdownMenuItem className="cursor-pointer" onSelect={loadUserDetails} disabled={isPending}>
             View Details
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -170,72 +178,60 @@ function ActionCell({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>User Details</DialogTitle>
-            <DialogDescription>
-              Complete information for {userName}
-            </DialogDescription>
+            <DialogDescription>Complete information for {userName}</DialogDescription>
           </DialogHeader>
+
           {userDetails ? (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Name</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {userDetails.name || 'Not provided'}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{userDetails.name || "Not provided"}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Email</Label>
-                <p className="col-span-3 text-sm text-muted-foreground break-all">
-                  {userDetails.email}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground break-all">{userDetails.email}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Password</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {userDetails.password ? '******' : 'Not set'}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{userDetails.password ? "******" : "Not set"}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Email Verified</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {formatDate(userDetails.emailVerified)}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{formatDate(userDetails.emailVerified)}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Image</Label>
-                <p className="col-span-3 text-sm text-muted-foreground break-all">
-                  {userDetails.image || 'Not provided'}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground break-all">{userDetails.image || "Not provided"}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">2FA Enabled</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {formatBoolean(userDetails.twoFactorEnabled)}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{formatBoolean(userDetails.twoFactorEnabled)}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Role</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {userDetails.roleName}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{userDetails.roleName}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Created At</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {formatDate(userDetails.createdAt)}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{formatDate(userDetails.createdAt)}</p>
               </div>
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Updated At</Label>
-                <p className="col-span-3 text-sm text-muted-foreground">
-                  {formatDate(userDetails.updatedAt)}
-                </p>
+                <p className="col-span-3 text-sm text-muted-foreground">{formatDate(userDetails.updatedAt)}</p>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center py-8">
-              {isPending ? 'Loading...' : 'No user details available'}
-            </div>
+            <div className="flex justify-center py-8">{isPending ? "Loading..." : "No user details available"}</div>
           )}
+
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Close</Button>
@@ -250,19 +246,14 @@ function ActionCell({
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {userName} ({userEmail})? This action
-              cannot be undone.
+              Are you sure you want to delete {userName} ({userEmail})? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button
-              variant="destructive"
-              onClick={onConfirmDelete}
-              disabled={isPending}
-            >
+            <Button variant="destructive" onClick={onConfirmDelete} disabled={isPending}>
               {isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
@@ -274,30 +265,20 @@ function ActionCell({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update user details below. Click save when you're done.
-            </DialogDescription>
+            <DialogDescription>Update user details below. Click save when you're done.</DialogDescription>
           </DialogHeader>
+
           <form onSubmit={onConfirmEdit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                minLength={2}
-              />
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={email}
-                disabled
-                className="opacity-70"
-              />
+              <Input id="email" value={email} disabled className="opacity-70" />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <select
@@ -306,13 +287,14 @@ function ActionCell({
                 onChange={(e) => setRoleName(e.target.value as RoleName)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {availableRoles.map((role) => (
+                {AVAILABLE_ROLES.map((role) => (
                   <option key={role} value={role}>
                     {role}
                   </option>
                 ))}
               </select>
             </div>
+
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">
@@ -329,5 +311,3 @@ function ActionCell({
     </div>
   )
 }
-
-export default ActionCell
