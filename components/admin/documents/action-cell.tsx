@@ -137,7 +137,7 @@ function DocumentActionCell({ documentId, documentTitle }: DocumentActionCellPro
   const formatDate = (date: Date) => date.toLocaleString()
 
   return (
-    <div className="rounded-md hover:bg-primary">
+    <div className="inline-flex items-center hover:bg-primary rounded-md">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
