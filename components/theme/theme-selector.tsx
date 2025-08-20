@@ -45,8 +45,19 @@ const MONO_THEMES = [
   },
 ]
 
+// Helper function to get theme category
+const getThemeCategory = (themeValue: string) => {
+  if (DEFAULT_THEMES.some(theme => theme.value === themeValue)) return "Default"
+  if (SCALED_THEMES.some(theme => theme.value === themeValue)) return "Scaled"
+  if (MONO_THEMES.some(theme => theme.value === themeValue)) return "Monospaced"
+  return "Theme"
+}
+
 export function ThemeSelector() {
   const { activeTheme, setActiveTheme } = useThemeConfig()
+  
+  // Get the current theme category
+  const themeCategory = getThemeCategory(activeTheme)
 
   return (
     <div className="flex items-center gap-2">
@@ -60,9 +71,9 @@ export function ThemeSelector() {
           className="justify-start *:data-[slot=select-value]:w-12"
         >
           <span className="text-muted-foreground hidden sm:block">
-            Select a theme:
+            Select theme: {themeCategory}
           </span>
-          <span className="text-muted-foreground block sm:hidden">Theme</span>
+          <span className="text-muted-foreground block sm:hidden">Theme: {themeCategory}</span>
           <SelectValue placeholder="Select a theme" />
         </SelectTrigger>
         <SelectContent align="end">

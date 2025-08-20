@@ -13,7 +13,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
     <ActiveThemeProvider initialTheme={activeThemeValue}>
       {/* Sticky Navbar at the top */}
       <div
-        className="border-b sticky top-0 z-50 bg-background"
+        className="border-b sticky top-0 z-50 bg-background/50 backdrop-blur-sm"
         style={{ height: NAVBAR_HEIGHT }}
       >
         <Navbar />

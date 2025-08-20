@@ -227,17 +227,3 @@ body {
     @apply !rounded-none !shadow-none;
   }
 }
-
-@layer components {
-  .card-hover-effect {
-    @apply transition-transform hover:-translate-y-1;
-  }
-  
-  .document-preview {
-    @apply bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900;
-  }
-  
-  .comment-bubble {
-    @apply relative bg-gray-50 dark:bg-gray-800 rounded-lg p-4 before:absolute before:top-3 before:-left-1 before:w-3 before:h-3 before:bg-gray-50 dark:before:bg-gray-800 before:rotate-45;
-  }
-}
