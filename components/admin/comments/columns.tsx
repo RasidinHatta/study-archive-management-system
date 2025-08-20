@@ -15,6 +15,7 @@ import { Comment, User, Document } from "@/lib/generated/prisma/client"
 import { CommentActionCell } from "./action-cell"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export type CommentWithRelations = Comment & {
   user: Pick<User, 'id' | 'name' | 'email'>
@@ -28,12 +29,43 @@ export type CommentWithRelations = Comment & {
   repliesCount?: number
 }
 
+// Skeleton components for loading states
+const ContentSkeleton = ({ isReply = false }: { isReply?: boolean }) => (
+  <div className={isReply ? "pl-6 border-l-2 border-muted-foreground/30" : ""}>
+    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-4 w-2/3 mt-1" />
+  </div>
+)
+
+const AuthorSkeleton = () => (
+  <div className="space-y-1">
+    <Skeleton className="h-3 w-20" />
+    <Skeleton className="h-3 w-24" />
+  </div>
+)
+
+const DocumentSkeleton = () => <Skeleton className="h-4 w-32" />
+const ReplyToSkeleton = () => <Skeleton className="h-5 w-16" />
+const RepliesSkeleton = () => <Skeleton className="h-5 w-12" />
+const DateSkeleton = () => <Skeleton className="h-3 w-24" />
+const ActionsSkeleton = () => (
+  <div className="flex space-x-2">
+    <Skeleton className="h-8 w-8 rounded-md" />
+    <Skeleton className="h-8 w-8 rounded-md" />
+    <Skeleton className="h-8 w-8 rounded-md" />
+  </div>
+)
+
 export const commentColumns: ColumnDef<CommentWithRelations>[] = [
   {
     accessorKey: "content",
     header: "Content",
-    cell: ({ row }) => {
-      const { content, parentId } = row.original
+    cell: ({ row, getValue }) => {
+      const content = getValue() as string
+      const parentId = row.original.parentId
+      
+      if (content === undefined) return <ContentSkeleton isReply={!!parentId} />
+      
       const maxLength = 50
       const truncated = content.length > maxLength
         ? `${content.substring(0, maxLength)}...`
@@ -60,11 +92,13 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
     accessorKey: "user",
     header: "Author",
     cell: ({ row }) => {
-      const { name, email } = row.original.user
+      const user = row.original.user
+      if (!user?.name && !user?.email) return <AuthorSkeleton />
+      
       return (
         <div className="space-y-1">
-          <p className="font-medium text-sm">{name || "Anonymous"}</p>
-          <p className="text-muted-foreground text-xs">{email}</p>
+          <p className="font-medium text-sm">{user.name || "Anonymous"}</p>
+          <p className="text-muted-foreground text-xs">{user.email}</p>
         </div>
       )
     },
@@ -74,7 +108,9 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
     accessorKey: "document.title",
     header: "Document",
     cell: ({ row }) => {
-      const title = row.original.document.title
+      const title = row.original.document?.title
+      if (title === undefined) return <DocumentSkeleton />
+      
       return (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -95,6 +131,8 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
     header: "Reply To",
     cell: ({ row }) => {
       const parent = row.original.parent
+      if (parent === undefined) return <ReplyToSkeleton />
+      
       if (!parent) return <span className="text-muted-foreground text-sm">—</span>
 
       return (
@@ -116,6 +154,9 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
     accessorKey: "_count.replies",
     header: "Replies",
     cell: ({ row }) => {
+      const replies = row.original
+      if (replies === undefined) return <RepliesSkeleton />
+      
       // First check for direct replies array
       const directRepliesCount = row.original.replies?.length || 0;
 
@@ -147,11 +188,16 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
         <ArrowUpDown className="ml-2 h-3 w-3" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="text-xs text-muted-foreground">
-        {new Date(row.original.createdAt).toLocaleString()}
-      </div>
-    ),
+    cell: ({ row, getValue }) => {
+      const value = getValue() as Date
+      if (!value) return <DateSkeleton />
+      
+      return (
+        <div className="text-xs text-muted-foreground">
+          {new Date(value).toLocaleString()}
+        </div>
+      )
+    },
     sortingFn: 'datetime',
     size: 160,
   },
@@ -167,14 +213,19 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
         <ArrowUpDown className="ml-2 h-3 w-3" />
       </Button>
     ),
-    cell: ({ row }) => {
-      const createdAt = new Date(row.original.createdAt)
-      const updatedAt = new Date(row.original.updatedAt)
-      const wasEdited = updatedAt.getTime() > createdAt.getTime() + 1000 // 1 second buffer
+    cell: ({ row, getValue }) => {
+      const updatedAt = getValue() as Date
+      const createdAt = row.original.createdAt
+      
+      if (!updatedAt || !createdAt) return <DateSkeleton />
+      
+      const createdDate = new Date(createdAt)
+      const updatedDate = new Date(updatedAt)
+      const wasEdited = updatedDate.getTime() > createdDate.getTime() + 1000 // 1 second buffer
 
       return wasEdited ? (
         <div className="text-xs text-muted-foreground">
-          {updatedAt.toLocaleString()}
+          {updatedDate.toLocaleString()}
         </div>
       ) : (
         <div className="text-xs text-muted-foreground/50">Not edited</div>
@@ -187,6 +238,11 @@ export const commentColumns: ColumnDef<CommentWithRelations>[] = [
     id: "actions",
     cell: ({ row }) => {
       const comment = row.original
+      // Show skeleton if comment data is incomplete
+      if (!comment.id || !comment.content || !comment.user?.id || !comment.document?.title) {
+        return <ActionsSkeleton />
+      }
+      
       return (
         <CommentActionCell
           commentId={comment.id}
