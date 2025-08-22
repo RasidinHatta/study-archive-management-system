@@ -38,6 +38,7 @@
     "emoji-picker-react": "^4.12.2",
     "framer-motion": "^12.7.4",
     "lucide-react": "^0.488.0",
+    "motion": "^12.23.12",
     "next": "15.3.0",
     "next-auth": "5.0.0-beta.26",
     "next-cloudinary": "^6.16.0",

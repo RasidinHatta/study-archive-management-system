@@ -125,7 +125,7 @@ model Document {
   id           String    @id @default(cuid())
   title        String
   description  String?
-  subject      String
+  subject      String? // Simple string field for subject/category
   url          String
   publicId     String
   format       String?

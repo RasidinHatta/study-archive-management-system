@@ -1,5 +1,10 @@
-import { Separator } from "@/components/ui/separator";
+import { AnimatedGroup } from "@/components/animations/AnimatedGroup";
+import { AnimatedText } from "@/components/animations/AnimatedText";
+import HeroGrid from "@/components/landing/hero/HeroGrid";
+import InteractiveGrid from "@/components/landing/hero/InteractiveGrid";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 const features = [
@@ -21,28 +26,7 @@ export default function Home() {
   return (
     <main>
       {/* Hero Section */}
-      <section className="min-h-screen flex flex-col justify-center items-center px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">Welcome to Study Archive</h1>
-        <p className="text-lg md:text-xl mb-8 max-w-2xl text-muted-foreground">
-          Upload, read, and share documents seamlessly — your digital library, always accessible.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button asChild size="lg" className="text-background rounded-full px-8 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-            <Link href="/register">
-              Get Started
-            </Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            className="rounded-full px-8 transition-all duration-300 hover:scale-105 hover:bg-foreground hover:text-background bg-accent text-foreground"
-          >
-            <Link href="/community">
-              Browse Documents
-            </Link>
-          </Button>
-        </div>
-      </section>
+      <HeroGrid />
 
       {/* Separator */}
       <Separator className="my-12" />
