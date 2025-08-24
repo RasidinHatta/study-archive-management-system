@@ -1,5 +1,5 @@
-import Footer from '@/components/general/Footer';
-import Navbar from '@/components/general/Navbar';
+import Footer from '@/components/navigation/Footer';
+import Navbar from '@/components/navigation/Navbar';
 import React, { Suspense } from 'react';
 
 const PublicLayout = async ({

@@ -1,10 +1,10 @@
-import { AnimatedGroup } from '@/components/animations/AnimatedGroup'
-import { AnimatedText } from '@/components/animations/AnimatedText'
 import { Button } from '@/components/ui/button'
 import { ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import InteractiveGrid from './InteractiveGrid'
+import { AnimatedGroup } from '../AnimatedGroup'
+import { AnimatedText } from '../AnimatedText'
 
 const HeroGrid = () => {
     return (
@@ -20,15 +20,14 @@ const HeroGrid = () => {
                         as="h1"
                         className="mb-6 text-2xl font-bold tracking-tight text-pretty lg:text-5xl"
                     >
-                        Welcome to {" "}
-                        <span className="text-brand">Study Archive</span>
+                        Welcome to Study<span className="text-primary">Archive</span>
                     </AnimatedText>
                     <AnimatedText
                         as="p"
                         className="text-muted-foreground mx-auto max-w-3xl lg:text-xl"
                         delay={0.15}
                     >
-                        Upload, read, and share documents seamlessly — your digital library, always accessible.
+                        Seamlessly upload, read, and share documents from your always-accessible digital library.
                     </AnimatedText>
                 </div>
                 <AnimatedGroup
