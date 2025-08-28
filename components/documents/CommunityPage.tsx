@@ -1,9 +1,8 @@
 'use client';
 
-import { Button } from '../ui/button';
-import Link from 'next/link';
-import DocumentsEmpty from '../empty-states/DocumentsEmpty';
-import { AnimatedContainer } from '../animations/AnimatedContainer';
+import { Button } from '../ui/button'
+import Link from 'next/link'
+import DocumentsEmpty from '../empty-states/DocumentsEmpty'
 import PDFCard from './PDFCard';
 import {
   Select,
@@ -13,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from 'react';
+import { AnimatedContainer } from '../landing/AnimatedContainer';
 
 interface Document {
   id: string;
