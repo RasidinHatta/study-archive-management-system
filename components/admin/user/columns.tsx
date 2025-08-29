@@ -59,9 +59,26 @@ const formatDateDDMMYYYY = (date: Date) => {
 }
 
 // -----------------------------
+// Types
+// -----------------------------
+export type UserWithRole = Pick<
+  User,
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "name"
+  | "email"
+  | "password"
+  | "emailVerified"
+  | "image"
+  | "twoFactorEnabled"
+  | "roleName"
+>
+
+// -----------------------------
 // Columns
 // -----------------------------
-export const userColumns: ColumnDef<User>[] = [
+export const userColumns: ColumnDef<UserWithRole>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => <SortableHeader column={column} label="Name" />,

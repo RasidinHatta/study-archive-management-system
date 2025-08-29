@@ -98,7 +98,7 @@ export function DataTable<TData, TValue>({
    */
   const globalFilterFn: FilterFn<TData> = (row, _columnId, filterValue) => {
     // Try to search common fields - adjust based on your data structure
-    const searchableFields = ['name', 'email', 'subject']
+    const searchableFields = ['name', 'email']
     const search = String(filterValue).toLowerCase()
 
     return searchableFields.some(field => {
