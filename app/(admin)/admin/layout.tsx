@@ -1,3 +1,4 @@
+import { SessionWatcher } from "@/components/auth/SessionWatcher";
 import { AppSidebar } from "@/components/navigation/app-sidebar";
 import { SiteHeader } from "@/components/navigation/site-header";
 import { ActiveThemeProvider } from "@/components/theme/active-theme"
@@ -10,7 +11,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   const activeThemeValue = cookieStore.get("active_theme")?.value;
   return (
     <SessionProvider >
-
+      <SessionWatcher />
       <ActiveThemeProvider initialTheme={activeThemeValue}>
         <SidebarProvider
           style={
