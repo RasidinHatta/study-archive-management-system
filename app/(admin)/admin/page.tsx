@@ -1,87 +1,86 @@
-import { getAllDocumentWithUserAndComment } from '@/data/document';
-import { getAllUserWithRole } from '@/data/user';
-import { getAllCommentWithDocAndUser } from '@/data/comment';
-import { columns as documentColumns } from '@/components/admin/documents/columns';
-import { userColumns } from '@/components/admin/user/columns';
-import { commentColumns } from '@/components/admin/comments/columns';
-import { DataTable as DocumentTable } from '@/components/admin/documents/data-table';
-import { DataTable as UserTable } from '@/components/admin/user/data-table';
-import { CommentsDataTable } from '@/components/admin/comments/data-table';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Heading } from '@/components/ui/heading';
+// app/admin/page.tsx (or /pages/admin/index.tsx if using pages router)
+"use client"
 
-interface StatCardProps {
-  title: string;
-  value: number;
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { BarChart3, FileText, Users, Settings } from "lucide-react"
 
-const StatCard = ({ title, value }: StatCardProps) => (
-  <Card className='bg-primary'>
-    <CardHeader>
-      <CardDescription className='text-foreground'>{title}</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <CardTitle className="text-2xl">{value}</CardTitle>
-    </CardContent>
-  </Card>
-);
-
-interface SectionProps {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}
-
-const Section = ({ title, description, children }: SectionProps) => (
-  <section>
-    <Heading title={title} description={description} />
-    <Separator className="my-4" />
-    {children}
-  </section>
-);
-
-const AdminPage = async () => {
-  const [documents, users, comments] = await Promise.all([
-    getAllDocumentWithUserAndComment(),
-    getAllUserWithRole(),
-    getAllCommentWithDocAndUser(),
-  ]);
-
-  // Handle null case for users
-  const safeUsers = users ?? [];
-  
-  const stats = [
-    { title: 'Total Users', value: safeUsers.length },
-    { title: 'Total Documents', value: documents.length },
-    { title: 'Total Comments', value: comments.length },
-  ];
-
+export default function AdminDashboard() {
   return (
-    <div className="p-4 space-y-12">
-      {/* Analytics Summary */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} title={stat.title} value={stat.value} />
-        ))}
-      </section>
+    <div className="p-6 space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <Button variant="outline" size="sm">Settings</Button>
+      </div>
 
-      {/* Community Documents Table */}
-      <Section title="Community Documents" description="Manage community documents">
-        <DocumentTable columns={documentColumns} data={documents} />
-      </Section>
+      {/* Stats Overview */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1,234</div>
+            <p className="text-xs text-muted-foreground">+10% from last month</p>
+          </CardContent>
+        </Card>
 
-      {/* User List Table */}
-      <Section title="User List" description="Manage users and their roles">
-        <UserTable columns={userColumns} data={safeUsers} />
-      </Section>
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Documents</CardTitle>
+            <FileText className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">567</div>
+            <p className="text-xs text-muted-foreground">+23 new this week</p>
+          </CardContent>
+        </Card>
 
-      {/* Comment List Table */}
-      <Section title="Comment List" description="Manage all comments">
-        <CommentsDataTable columns={commentColumns} data={comments} />
-      </Section>
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+            <BarChart3 className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">89</div>
+            <p className="text-xs text-muted-foreground">Live now</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">System Health</CardTitle>
+            <Settings className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">Good</div>
+            <p className="text-xs text-muted-foreground">No issues detected</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity / Logs */}
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between border-b pb-2">
+            <p className="text-sm">User <b>john.doe</b> uploaded a document</p>
+            <span className="text-xs text-muted-foreground">2 mins ago</span>
+          </div>
+          <div className="flex items-center justify-between border-b pb-2">
+            <p className="text-sm">System backup completed</p>
+            <span className="text-xs text-muted-foreground">1 hour ago</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm">New admin role created</p>
+            <span className="text-xs text-muted-foreground">Yesterday</span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  );
-};
-
-export default AdminPage;
+  )
+}

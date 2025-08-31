@@ -42,7 +42,12 @@ const UserSkeleton = () => (
     <Skeleton className="h-3 w-3/5" />
   </div>
 )
-const DateSkeleton = () => <Skeleton className="h-4 w-16" />
+const DateSkeleton = () => (
+  <div className="space-y-1">
+    <Skeleton className="h-3 w-12" />
+    <Skeleton className="h-3 w-10" />
+  </div>
+)
 const ActionsSkeleton = () => (
   <div className="flex space-x-2">
     <Skeleton className="h-8 w-8 rounded-md" />
@@ -87,7 +92,7 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
       return <span className="font-medium text-sm">{value}</span>
     },
     enableSorting: true,
-    size: 320,
+    size: 280, // Reduced from 320
   },
   {
     accessorKey: "description",
@@ -103,7 +108,7 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
         description.length > maxLength ? `${description.substring(0, maxLength)}...` : description
 
       return (
-        <div className="pl-6 border-l-2 border-muted-foreground/30">
+        <div className="pl-6 border-muted-foreground/30">
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="line-clamp-2 text-sm">{truncated}</span>
@@ -115,7 +120,7 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
         </div>
       )
     },
-    size: 360,
+    size: 300, // Reduced from 360
   },
   {
     accessorKey: "subject",
@@ -126,7 +131,7 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
       return <span className="text-sm">{value}</span>
     },
     enableSorting: true,
-    size: 160,
+    size: 140, // Reduced from 160
   },
   {
     accessorKey: "format",
@@ -137,7 +142,7 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
       return <span className="text-sm">{value}</span>
     },
     enableSorting: true,
-    size: 120,
+    size: 100, // Reduced from 120
   },
   {
     accessorKey: "user",
@@ -145,33 +150,67 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
     cell: ({ row }) => {
       const user = row.original.user
       if (!user?.name || !user?.email) return <UserSkeleton />
-      return <span className="text-sm">{`${user.name} (${user.email})`}</span>
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-sm line-clamp-1">{`${user.name}`}</span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{user.name} ({user.email})</p>
+          </TooltipContent>
+        </Tooltip>
+      )
     },
-    size: 240,
+    size: 150, // Reduced from 240
   },
   {
-    accessorKey: "createdAt",
-    header: ({ column }) => <SortableHeader column={column} label="Created" />,
+    id: "dates",
+    header: ({ column }) => <SortableHeader column={column} label="Dates" />,
     cell: ({ row }) => {
-      const value = row.original.createdAt
-      if (!value) return <DateSkeleton />
-      return <span className="text-xs text-muted-foreground">{formatDateDDMMYYYY(new Date(value))}</span>
+      const { createdAt, updatedAt } = row.original
+
+      if (!createdAt || !updatedAt) return <DateSkeleton />
+
+      const createdDate = new Date(createdAt)
+      const updatedDate = new Date(updatedAt)
+
+      return (
+        <div className="space-y-1 text-xs text-muted-foreground">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1">
+                <span className="font-medium">C:</span>
+                <span>{formatDateDDMMYYYY(createdDate)}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Created: {createdDate.toLocaleDateString()}</p>
+              <p>Updated: {updatedDate.toLocaleDateString()}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1">
+                <span className="font-medium">U:</span>
+                <span>{formatDateDDMMYYYY(updatedDate)}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Created: {createdDate.toLocaleDateString()}</p>
+              <p>Updated: {updatedDate.toLocaleDateString()}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )
     },
     enableSorting: true,
-    sortingFn: "datetime",
-    size: 140,
-  },
-  {
-    accessorKey: "updatedAt",
-    header: ({ column }) => <SortableHeader column={column} label="Last Edited" />,
-    cell: ({ row }) => {
-      const value = row.original.updatedAt
-      if (!value) return <DateSkeleton />
-      return <span className="text-xs text-muted-foreground">{formatDateDDMMYYYY(new Date(value))}</span>
+    sortingFn: (rowA, rowB, columnId) => {
+      // Sort by updatedAt date (most recent first)
+      const dateA = new Date(rowA.original.updatedAt)
+      const dateB = new Date(rowB.original.updatedAt)
+      return dateA.getTime() - dateB.getTime()
     },
-    enableSorting: true,
-    sortingFn: "datetime",
-    size: 140,
+    size: 100, // Combined from 280 (140 + 140)
   },
   {
     id: "actions",
@@ -181,6 +220,6 @@ export const columns: ColumnDef<DocumentWithUser>[] = [
 
       return <DocumentActionCell documentId={document.id} documentTitle={document.title} />
     },
-    size: 120,
+    size: 100, // Reduced from 120
   },
 ]

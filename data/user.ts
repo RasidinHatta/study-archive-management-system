@@ -22,22 +22,16 @@ export const getAllUser = async () => {
  * @returns Array of user objects or null if an error occurs.
  */
 export const getAllUserWithRole = async () => {
-    try {
-        const users = await db.user.findMany({
-            where: {
-                NOT: {
-                    roleName: "ADMIN"
-                }
-            },
-            orderBy: {
-                name: "asc", // 👈 default sort
-            },
-        });
-        return users;
-    } catch (error) {
-        console.log(error);
-        return null;
-    }
+  return await db.user.findMany({
+    where: {
+      NOT: {
+        roleName: "ADMIN",
+      },
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
 };
 
 /**
