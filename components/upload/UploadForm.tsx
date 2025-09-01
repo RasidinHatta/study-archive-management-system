@@ -19,18 +19,25 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { uploadDocCloudinary } from "@/actions/document";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { PlusIcon, X, XIcon } from "lucide-react";
 
 /**
  * UploadForm Component
- * 
+ *
  * A form for uploading documents to the platform with:
  * - Title input
  * - Subject selection dropdown
  * - Description textarea
  * - File upload functionality
  * - Cloudinary integration for file storage
- * 
+ *
  * Features:
  * - Form validation using Zod schema
  * - Loading state during upload
@@ -72,7 +79,7 @@ const UploadForm = () => {
 
     // Upload document to Cloudinary
     const res = await uploadDocCloudinary(file, data);
-    
+
     // Handle response
     if (res.error) {
       toast.error(res.error);
@@ -108,17 +115,17 @@ const UploadForm = () => {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="Document's title" 
-                      type="text" 
+                    <Input
+                      {...field}
+                      placeholder="Document's title"
+                      type="text"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             {/* Subject Selection Dropdown */}
             <FormField
               control={form.control}
@@ -126,8 +133,8 @@ const UploadForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subject</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
+                  <Select
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -147,7 +154,7 @@ const UploadForm = () => {
                 </FormItem>
               )}
             />
-            
+
             {/* Description Textarea */}
             <FormField
               control={form.control}
@@ -156,39 +163,77 @@ const UploadForm = () => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
-                      placeholder="Brief description" 
-                    />
+                    <Textarea {...field} placeholder="Brief description" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* File Upload Input */}
+            {/* Compact Upload */}
+            {/* Compact File Upload Input */}
             <FormItem>
               <FormLabel>Upload File</FormLabel>
               <FormControl>
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx" // Restrict to document formats
-                  ref={fileInputRef}
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setFile(e.target.files[0]);
-                    }
-                  }}
-                />
+                <div className="flex items-center gap-3 rounded-lg border border-border border-dashed p-3">
+                  {/* Hidden Input */}
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    ref={fileInputRef}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setFile(e.target.files[0])
+                      }
+                    }}
+                    className="sr-only"
+                    id="file-input"
+                  />
+
+                  {/* Upload Button */}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <PlusIcon className="h-4 w-4 mr-1" />
+                    Choose File
+                  </Button>
+
+                  {/* File Name Preview */}
+                  {file ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="truncate max-w-[200px]">{file.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => {
+                          setFile(null)
+                          if (fileInputRef.current) fileInputRef.current.value = ""
+                        }}
+                      >
+                        <XIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No file selected
+                    </p>
+                  )}
+                </div>
               </FormControl>
               {!file && <FormMessage>Please select a file</FormMessage>}
             </FormItem>
+
           </div>
 
           {/* Submit Button with Loading State */}
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full text-background"
             disabled={loading}
           >
             {loading ? "Uploading..." : "Upload Document"}
