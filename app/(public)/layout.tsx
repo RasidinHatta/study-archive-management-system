@@ -1,6 +1,7 @@
 import Footer from '@/components/navigation/Footer';
 import Navbar from '@/components/navigation/Navbar';
 import NavbarSkeleton from '@/components/skeletons/NavbarSkeleton ';
+import { Separator } from '@/components/ui/separator';
 import React, { Suspense } from 'react';
 
 const PublicLayout = async ({
@@ -16,6 +17,7 @@ const PublicLayout = async ({
                 </Suspense>
             </div>
             <main className="flex-1">{children}</main>
+            <Separator />
             <Footer />
         </div>
     );
