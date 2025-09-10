@@ -16,10 +16,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import GoogleButton from "../GoogleButton"
 import Link from "next/link"
 import AuthCardWrapper from "../AuthCardWrapper"
+import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
     const [showTwoFactor, setShowTwoFactor] = useState(false)
     const [isPending, startTransition] = useTransition()
+    const [showPassword, setShowPassword] = useState(false)
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -77,6 +79,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                 />
 
                                 {/* Password */}
+                                {/* Password */}
                                 <FormField
                                     control={form.control}
                                     name="password"
@@ -84,7 +87,25 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                         <FormItem>
                                             <FormLabel>Password</FormLabel>
                                             <FormControl>
-                                                <Input {...field} type="password" placeholder="******" disabled={isPending} />
+                                                <div className="relative">
+                                                    <Input
+                                                        {...field}
+                                                        type={showPassword ? "text" : "password"}
+                                                        placeholder="******"
+                                                        disabled={isPending}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                                                        onClick={() => setShowPassword((prev) => !prev)}
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff className="h-4 w-4" />
+                                                        ) : (
+                                                            <Eye className="h-4 w-4" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

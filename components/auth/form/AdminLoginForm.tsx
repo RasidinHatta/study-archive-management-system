@@ -12,9 +12,11 @@ import { adminLogin } from '@/actions/login'
 import AuthCardWrapper from '../AuthCardWrapper'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { Eye, EyeOff } from "lucide-react"
 
 const AdminLoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -74,12 +76,25 @@ const AdminLoginForm = ({ className, ...props }: React.ComponentProps<"div">) =>
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="******"
-                                                type="password"
-                                                disabled={loading}
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    placeholder="******"
+                                                    type={showPassword ? "text" : "password"}
+                                                    disabled={loading}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                                                    onClick={() => setShowPassword(prev => !prev)}
+                                                >
+                                                    {showPassword ? (
+                                                        <EyeOff className="h-4 w-4" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4" />
+                                                    )}
+                                                </button>
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
