@@ -26,11 +26,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-
 import { updateUserInfo } from "@/actions/user"
 import { ProfileSchema } from "@/lib/schemas"
 import ChangeImageForm from "@/components/user/ChangeImageForm"
-import { Switch } from "@/components/ui/switch"
+import { Switch, SwitchIndicator, SwitchWrapper } from "@/components/ui/switch"
+import { Lock, Unlock } from "lucide-react"
 
 const ProfilePage = () => {
   const { data: session, status } = useSession()
@@ -174,10 +174,20 @@ const ProfilePage = () => {
                         <FormMessage />
                       </div>
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <SwitchWrapper>
+                          <Switch
+                            id="twoFactorEnabled"
+                            size="md"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                          <SwitchIndicator state="on">
+                            <Lock className="size-4 text-primary-foreground" />
+                          </SwitchIndicator>
+                          <SwitchIndicator state="off">
+                            <Unlock className="size-4 text-muted-foreground" />
+                          </SwitchIndicator>
+                        </SwitchWrapper>
                       </FormControl>
                     </FormItem>
                   )}
