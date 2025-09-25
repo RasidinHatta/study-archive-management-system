@@ -39,12 +39,17 @@ export const register = async (data: z.infer<typeof RegisterSchema>) => {
     /**
      * Determine user role based on email domain:
      * - @graduate.utm.my → USER role
+     * - @utm.my → USER role
      * - All others → PUBLICUSER role
      */
-    const roleName: RoleName = lowerCaseEmail.endsWith("@graduate.utm.my")
+    const utmDomains = ["@graduate.utm.my", "@utm.my"];
+
+    const roleName: RoleName = utmDomains.some(domain =>
+      lowerCaseEmail.endsWith(domain)
+    )
       ? RoleName.USER
       : RoleName.PUBLICUSER;
-
+      
     // Securely hash password with bcrypt (10 salt rounds)
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -60,7 +65,7 @@ export const register = async (data: z.infer<typeof RegisterSchema>) => {
 
     // Generate email verification token (expires after 1 hour)
     const verificationToken = await generateVerificationToken(lowerCaseEmail);
-    
+
     // Send verification email with the generated token
     await sendVerificationEmail(lowerCaseEmail, verificationToken.token);
 
