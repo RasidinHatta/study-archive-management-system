@@ -1,11 +1,3 @@
-/**
- * Source: /components/admin/documents/data-table.tsx
- *
- * This file defines a reusable DataTable component for displaying tabular document data in the admin panel.
- * It supports sorting, filtering, pagination, and column visibility toggling using @tanstack/react-table.
- * The table is styled with custom UI components and provides a global search for title and description.
- */
-
 "use client" // Marks this as a Client Component in Next.js
 
 import * as React from "react"
@@ -23,7 +15,6 @@ import {
   useReactTable,
   getFacetedUniqueValues,
   getFacetedRowModel,
-  Row,
 } from "@tanstack/react-table"
 
 import {
@@ -58,16 +49,19 @@ import { IconChevronsLeft, IconChevronLeft, IconChevronRight, IconChevronsRight 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  documents: { id: string; title: string }[] // Add documents prop
 }
 
 /**
- * DataTable component - A reusable table component with sorting, filtering, and pagination
+ * DataTable component - A reusable table component with sorting, filtering, pagination, and document selection
  * @param {ColumnDef<TData, TValue>[]} columns - Column definitions
  * @param {TData[]} data - Table data
+ * @param {{ id: string; title: string }[]} documents - List of documents for selection
  */
 export function DataTable<TData, TValue>({
   columns,
   data: initialData,
+  documents,
 }: DataTableProps<TData, TValue>) {
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
@@ -75,6 +69,10 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = React.useState("")
+  // Initialize with the first document's ID, or null if no documents
+  const [selectedDocumentId, setSelectedDocumentId] = React.useState<string | null>(
+    documents.length > 0 ? documents[0].id : null
+  )
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -91,6 +89,12 @@ export function DataTable<TData, TValue>({
     [data]
   )
 
+  // Filter data based on selected document
+  const filteredData = React.useMemo(() => {
+    if (!selectedDocumentId) return initialData
+    return initialData.filter((item: any) => item.document?.id === selectedDocumentId)
+  }, [initialData, selectedDocumentId])
+
   /**
    * Custom filter function for global search
    * Searches both title and description fields by default
@@ -98,27 +102,20 @@ export function DataTable<TData, TValue>({
    */
   const globalFilterFn: FilterFn<TData> = (row, _columnId, filterValue) => {
     const search = String(filterValue).toLowerCase()
-
-    // Grab row data (the actual object from your table)
     const original = row.original as any
-
-    // Define searchable fields
     const searchableFields = [
       original.content,
       original.user?.name,
       original.user?.email,
       original.document?.title,
     ]
-
-    // Compare
     return searchableFields.some(val =>
       String(val ?? "").toLowerCase().includes(search)
     )
   }
 
-
   const table = useReactTable({
-    data,
+    data: filteredData, // Use filtered data
     columns,
     state: {
       sorting,
@@ -160,6 +157,25 @@ export function DataTable<TData, TValue>({
     <div className="w-full flex-col justify-start gap-6">
       {/* Search and Controls Section */}
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 p-4 lg:px-6">
+        {/* Document selection dropdown */}
+        {documents.length > 0 && (
+          <Select
+            value={selectedDocumentId ?? documents[0]?.id}
+            onValueChange={(value) => setSelectedDocumentId(value)}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select a document" />
+            </SelectTrigger>
+            <SelectContent>
+              {documents.map((doc) => (
+                <SelectItem key={doc.id} value={doc.id}>
+                  {doc.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
         {/* Global search input */}
         <Input
           placeholder="Search..."
@@ -243,7 +259,6 @@ export function DataTable<TData, TValue>({
                 )}
               </TableBody>
             </Table>
-
           </DndContext>
         </div>
 
