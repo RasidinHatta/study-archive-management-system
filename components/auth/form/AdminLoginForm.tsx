@@ -17,6 +17,7 @@ import { Eye, EyeOff } from "lucide-react"
 const AdminLoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const [showTwoFactor, setShowTwoFactor] = useState(false)
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -31,15 +32,16 @@ const AdminLoginForm = ({ className, ...props }: React.ComponentProps<"div">) =>
         setLoading(true);
         adminLogin(data).then((res) => {
             if (res.error) {
-                toast.error(res.error, {
-                    duration: 5000
-                });
+                toast.error(res.error, { duration: 5000 });
                 setLoading(false);
             }
             if (res.success) {
-                toast.success(res.success, {
-                    duration: 3000
-                });
+                toast.success(res.success, { duration: 3000 });
+                form.reset();
+                setLoading(false);
+            }
+            if (res.twoFactor) {
+                setShowTwoFactor(true);
                 setLoading(false);
             }
         });
@@ -51,58 +53,71 @@ const AdminLoginForm = ({ className, ...props }: React.ComponentProps<"div">) =>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Email</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="johndoe@email.com"
-                                                type="email"
-                                                disabled={loading}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Password</FormLabel>
-                                        <FormControl>
-                                            <div className="relative">
-                                                <Input
-                                                    {...field}
-                                                    placeholder="******"
-                                                    type={showPassword ? "text" : "password"}
-                                                    disabled={loading}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
-                                                    onClick={() => setShowPassword(prev => !prev)}
-                                                >
-                                                    {showPassword ? (
-                                                        <EyeOff className="h-4 w-4" />
-                                                    ) : (
-                                                        <Eye className="h-4 w-4" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {!showTwoFactor && (
+                                <>
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} type="email" placeholder="johndoe@email.com" disabled={loading} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Password</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Input
+                                                            {...field}
+                                                            placeholder="******"
+                                                            type={showPassword ? "text" : "password"}
+                                                            disabled={loading}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                                                            onClick={() => setShowPassword(prev => !prev)}
+                                                        >
+                                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                        </button>
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
+                            )}
+
+                            {showTwoFactor && (
+                                <FormField
+                                    control={form.control}
+                                    name="code"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Two-Factor Code</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="123456" disabled={loading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
                         </div>
                         <Button type="submit" className="w-full text-background" disabled={loading}>
-                            {loading ? "Logging In..." : "Login"}
+                            {loading
+                                ? (showTwoFactor ? "Confirming..." : "Logging In...")
+                                : (showTwoFactor ? "Confirm" : "Login")}
                         </Button>
                     </form>
                 </Form>

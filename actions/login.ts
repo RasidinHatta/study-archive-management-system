@@ -116,7 +116,7 @@ export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid input data" };
   }
 
-  const { email, password } = validatedData.data;
+  const { email, password, code } = validatedData.data;
   const user = await getUserByEmail(email);
 
   // Check if user exists and has password/email
@@ -124,7 +124,7 @@ export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
     return { error: "User not found" };
   }
 
-  // Additional check for admin role
+  // ✅ Enforce ADMIN role
   if (user.roleName !== "ADMIN") {
     return { error: "User not admin" };
   }
@@ -133,6 +133,40 @@ export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
   if (!isPasswordCorrect) {
     return { error: "Wrong Password" };
+  }
+
+  // ✅ Always enforce 2FA for admins
+  if (user.twoFactorEnabled) {
+    if (code) {
+      // Verify the 2FA code if provided
+      const twoFactorToken = await getTwoFactorTokenByEmail(user.email);
+      if (!twoFactorToken || twoFactorToken.token !== code) {
+        return { error: "Invalid Code!" };
+      }
+
+      // Check if code has expired
+      const hasExpired = new Date(twoFactorToken.expires) < new Date();
+      if (hasExpired) {
+        await db.twoFactorToken.delete({ where: { id: twoFactorToken.id } });
+        return { error: "Code expired!" };
+      }
+
+      // Clean up used token
+      await db.twoFactorToken.delete({ where: { id: twoFactorToken.id } });
+
+      // Remove any existing confirmation and create new one
+      const existingConfirmation = await getTwoFactorConfirmationByUserId(user.id);
+      if (existingConfirmation) {
+        await db.twoFactorConfirmation.delete({ where: { id: existingConfirmation.id } });
+      }
+
+      await db.twoFactorConfirmation.create({ data: { userId: user.id } });
+    } else {
+      // If no code provided → generate + send 2FA code
+      const twoFactorToken = await generateTwoFactorToken(user.email);
+      await sendTwoFactorEmail(twoFactorToken.email, twoFactorToken.token);
+      return { twoFactor: true }; // 🔑 frontend should now show code input
+    }
   }
 
   // Attempt to sign in with credentials (redirects to admin dashboard)
@@ -155,7 +189,8 @@ export const adminLogin = async (data: z.infer<typeof LoginSchema>) => {
   }
 
   return { success: "Admin logged in successfully!" };
-}
+};
+
 
 /**
  * Handles Google OAuth authentication

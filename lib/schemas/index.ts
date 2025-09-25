@@ -142,3 +142,8 @@ export const ProfileSchema = z.object({
     message: "New passwords don't match",
     path: ["confirmPassword"],
 });
+
+export const AdminProfileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  twoFactorEnabled: z.boolean(),
+})
