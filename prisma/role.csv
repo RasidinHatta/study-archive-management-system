@@ -1,0 +1,3 @@
+"id","name","description","createDocument","updateDocument","deleteDocument","readDocument","createComment","deleteComment","readComment","createdAt","updatedAt","updateComment"
+"094912c4-1036-428b-ba5f-473857547b62","ADMIN","Administrator with full access","false","true","true","true","false","true","true","2025-05-22 02:45:59.012","2025-06-06 12:33:39.398","true"
+"b3f9cd2e-1722-4191-ba34-d3a87b028b88","USER","Authenticated user with standard permissions","true","true","true","true","true","false","true","2025-05-22 02:45:59.012","2025-07-04 06:28:57.134","false"
