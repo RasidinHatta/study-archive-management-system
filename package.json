@@ -16,7 +16,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.0.1",
-    "@prisma/client": "7.1.0",
+    "@prisma/adapter-pg": "^7.1.0",
     "@prisma/nextjs-monorepo-workaround-plugin": "^6.7.0",
     "@prismicio/react": "^3.2.1",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -78,6 +78,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@prisma/client": "7.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.17",
@@ -91,6 +92,7 @@
     "prisma": "7.1.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   },
   "pnpm": {

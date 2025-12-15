@@ -1,42 +1,33 @@
 import { RoleName } from "@/lib/generated/prisma";
 import db from "./prisma";
+import bcrypt from "bcryptjs"; // Assuming bcryptjs is installed for password hashing
 
-async function seedRoles() {
-  await db.role.create({
-    data: {
+async function seedAdminUser() {
+  const adminRole = await db.role.findUnique({
+    where: {
       name: RoleName.ADMIN,
-      description: "Administrator with full access",
-      createDocument: true,
-      updateDocument: true,
-      deleteDocument: true,
-      readDocument: true,
-      createComment: true,
-      deleteComment: true,
-      readComment: true,
     },
   });
 
-  await db.role.create({
-    data: {
-      name: RoleName.USER,
-      description: "Authenticated user with standard permissions",
-      createDocument: true,
-      updateDocument: true,
-      readDocument: true,
-      createComment: true,
-      deleteComment: true,
-      readComment: true,
-    },
-  });
+  if (!adminRole) {
+    console.error("Admin role not found. Please seed roles first.");
+    return;
+  }
 
-  await db.role.create({
+  const hashedPassword = await bcrypt.hash("@Dmin123", 10); // Hash the password
+
+  await db.user.create({
     data: {
-      name: RoleName.PUBLICUSER,
-      description: "Guest user with limited read access",
-      readDocument: true,
-      readComment: true,
+      email: "admin@sams.com",
+      password: hashedPassword,
+      role: {
+        connect: {
+          id: adminRole.id,
+        },
+      },
     },
   });
+  console.log("Admin user seeded successfully.");
 }
 
-seedRoles().finally(() => db.$disconnect());
+seedAdminUser().finally(() => db.$disconnect());
