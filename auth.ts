@@ -64,12 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         } else {
           // Create new Google user if not existing
 
-          const utmDomains = ["@graduate.utm.my", "@utm.my"];
-
-          const roleName =
-            utmDomains.some(domain => email.endsWith(domain))
-              ? RoleName.USER
-              : RoleName.PUBLICUSER;
+          const roleName = RoleName.USER;
 
           const newUser = await db.user.create({
             data: {

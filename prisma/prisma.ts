@@ -1,15 +1,16 @@
-import { PrismaClient } from "@/lib/generated/prisma";
+import "dotenv/config";
+import { PrismaClient } from '@/lib/generated/prisma';
 
-const prismaClientSingleton = () => {
-  return new PrismaClient();
-};
+const prismaClientSingleton = () =>
+  new PrismaClient();
 
-declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
-} & typeof global;
+declare global {
+  // Re-use the same global name so existing imports keep working
+  var prismaGlobal: PrismaClient | undefined;
+}
 
-const db = globalThis.prismaGlobal ?? prismaClientSingleton();
+const db = global.prismaGlobal ?? prismaClientSingleton();
 
 export default db;
 
-if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = db;
+if (process.env.NODE_ENV !== 'production') global.prismaGlobal = db;
