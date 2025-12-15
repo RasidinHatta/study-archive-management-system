@@ -146,7 +146,7 @@ export function RolesTable({ roles: initialRoles }: RolesTableProps) {
                             <RoleUserDialog
                                 open={userDialogRoleId === role.id}
                                 onOpenChange={(open) => setUserDialogRoleId(open ? role.id : null)}
-                                roleName={role.name as "USER" | "PUBLICUSER"}
+                                roleName={role.name}
                             />
                         </TableCell>
 

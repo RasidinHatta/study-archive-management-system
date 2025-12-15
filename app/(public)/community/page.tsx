@@ -19,7 +19,6 @@ export default async function Page({ searchParams }: PageProps) {
   const query = q?.toLowerCase() ?? ''
 
   const session = await auth()
-  const upload = session?.user?.role.name === RoleName.USER
 
   const documents = await getCommunityDocuments()
   const filtered = query

@@ -3,6 +3,7 @@
 import db from "@/prisma/prisma"
 import { revalidatePath } from "next/cache"
 import { startOfMonth, subMonths } from "date-fns"
+import { RoleName } from "@/lib/generated/prisma"
 
 /**
  * Deletes a user by their unique ID.
@@ -68,7 +69,7 @@ export const editUserById = async (userId: string, data: {
   password?: string | null,
   image?: string | null,
   twoFactorEnabled?: boolean,
-  roleName?: "USER" | "ADMIN" | "PUBLICUSER"
+  roleName?: RoleName
 }) => {
   try {
     await db.user.update({
@@ -92,10 +93,10 @@ export const editUserById = async (userId: string, data: {
 /**
  * Fetches users filtered by their role name.
  * Returns basic user info and role description.
- * @param roleName - The role name to filter users by ("ADMIN", "USER", "PUBLICUSER").
+ * @param roleName - The role name to filter users by ("ADMIN", "USER").
  * @returns Success status and array of users, or error message.
  */
-export async function getUsersByRoleName(roleName: "ADMIN" | "USER" | "PUBLICUSER") {
+export async function getUsersByRoleName(roleName: RoleName) {
   try {
     const users = await db.user.findMany({
       where: {

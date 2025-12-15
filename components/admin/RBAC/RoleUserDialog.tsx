@@ -13,6 +13,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { RoleName } from "@/lib/generated/prisma"
 
 /**
  * Props for RoleUserDialog component
@@ -23,7 +24,7 @@ import { Button } from "@/components/ui/button"
 interface RoleUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  roleName: "ADMIN" | "USER" | "PUBLICUSER"
+  roleName: RoleName
 }
 
 /**

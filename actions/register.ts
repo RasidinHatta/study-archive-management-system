@@ -36,19 +36,7 @@ export const register = async (data: z.infer<typeof RegisterSchema>) => {
       return { error: "Email is already in use. Please try another one." };
     }
 
-    /**
-     * Determine user role based on email domain:
-     * - @graduate.utm.my → USER role
-     * - @utm.my → USER role
-     * - All others → PUBLICUSER role
-     */
-    const utmDomains = ["@graduate.utm.my", "@utm.my"];
-
-    const roleName: RoleName = utmDomains.some(domain =>
-      lowerCaseEmail.endsWith(domain)
-    )
-      ? RoleName.USER
-      : RoleName.PUBLICUSER;
+    const roleName: RoleName = RoleName.USER;
       
     // Securely hash password with bcrypt (10 salt rounds)
     const hashedPassword = await bcrypt.hash(password, 10);

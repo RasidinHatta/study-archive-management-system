@@ -46,7 +46,7 @@ type UserDetails = {
 }
 
 /** Roles available for selection */
-const AVAILABLE_ROLES: RoleName[] = ["USER", "PUBLICUSER"]
+const AVAILABLE_ROLES: RoleName[] = [RoleName.USER]
 
 /** Format a date or return fallback text */
 const formatDate = (date: Date | null | string | undefined) =>

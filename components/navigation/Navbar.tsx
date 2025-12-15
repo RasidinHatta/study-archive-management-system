@@ -37,7 +37,7 @@ const Navbar = async () => {
     // Get current session data
     const session = await auth()
     // Check if user has permission to upload documents
-    const canUpload = session?.user?.role.createDocument
+    const canUpload = session?.user?.role?.createDocument
 
     return (
         <header className="border-b">
