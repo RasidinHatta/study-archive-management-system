@@ -20,7 +20,7 @@ const HeroGrid = () => {
                         as="h1"
                         className="mb-6 text-2xl font-bold tracking-tight text-pretty lg:text-5xl"
                     >
-                        Welcome to Study<span className="text-primary">TEST</span>
+                        Welcome to Study<span className="text-primary">Archive</span>
                     </AnimatedText>
                     <AnimatedText
                         as="p"
